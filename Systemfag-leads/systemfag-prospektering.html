@@ -1,0 +1,2699 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Systemfag — Prospektering</title>
+<style>
+/* System font stack — skarp, rask, full norsk støtte (æøå) */
+:root {
+  --sans: -apple-system, 'Segoe UI', system-ui, BlinkMacSystemFont, sans-serif;
+  --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+
+:root {
+  --bg:      #f5f2ee;
+  --bg2:     #ede8e0;
+  --bg3:     #e4ddd2;
+  --white:   #ffffff;
+  --header:  #1a120a;
+  --border:  #e4dbd0;
+  --border2: #d4c8b8;
+  --accent:  #e8512a;
+  --accent2: #c8400e;
+  --accentbg:#faeae0;
+  --accentb2:rgba(232,81,42,.18);
+  --green:   #1a8a3c;
+  --greenbg: #eaf5ec;
+  --greenb:  rgba(26,138,60,.2);
+  --blue:    #1a5fa0;
+  --bluebg:  #e8f0fa;
+  --blueb:   rgba(26,95,160,.2);
+  --warn:    #8a5800;
+  --warnbg:  #fdf3dc;
+  --warnb:   rgba(138,88,0,.2);
+  --red:     #a02020;
+  --redbg:   #faeaea;
+  --redb:    rgba(160,32,32,.2);
+  --text:    #1a120a;
+  --text2:   #7a6858;
+  --text3:   #a89878;
+  --mono:    var(--mono);
+  --sans:    var(--sans);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 46px;
+  background: var(--header);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-mark { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.logo-sq { width: 6px; height: 6px; border-radius: 1.5px; background: var(--accent); }
+.logo-name { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: -.01em; }
+.logo-name b { color: var(--accent); font-weight: 700; }
+.topbar-sep { width: 1px; height: 14px; background: rgba(255,255,255,.1); }
+.topbar-live { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,.35); font-family: var(--mono); }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ── NAV ── */
+.nav { display: flex; border-bottom: 1px solid var(--border); background: var(--bg2); padding: 0 20px; }
+.nav-btn { font-size: 11px; font-weight: 500; color: var(--text3); padding: 0 14px; height: 40px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s; white-space: nowrap; }
+.nav-btn:hover { color: var(--text); }
+.nav-btn.act { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── BUTTONS ── */
+.btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--sans); font-size: 12px; font-weight: 600; padding: .45rem 1rem; cursor: pointer; transition: all .12s; white-space: nowrap; display: inline-flex; align-items: center; gap: .35rem; }
+.btn:hover { background: var(--accent2); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-family: var(--sans); font-size: 11px; font-weight: 500; padding: .38rem .85rem; cursor: pointer; transition: all .12s; white-space: nowrap; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accentbg); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid var(--redb); border-radius: 5px; font-family: var(--mono); font-size: 11px; padding: .22rem .5rem; cursor: pointer; transition: all .12s; }
+.btn-danger:hover { background: var(--redbg); }
+
+/* ── INPUTS ── */
+.inp { width: 100%; background: var(--white); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: var(--sans); font-size: 13px; padding: .5rem .8rem; outline: none; transition: border-color .12s, box-shadow .12s; }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,81,42,.1); }
+.inp::placeholder { color: var(--text3); }
+select.inp option { background: var(--white); }
+.lbl { display: block; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); margin-bottom: .35rem; }
+
+/* ── CARDS ── */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.card-accent { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; border-left: 3px solid var(--accent); }
+
+/* ── STAT CARDS ── */
+.stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; }
+.stat-n { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
+.stat-l { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .09em; color: var(--text2); margin-top: .35rem; }
+
+/* ── TAGS ── */
+.tag { font-family: var(--mono); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.tag-accent { background: var(--accentbg); color: #7a2808; border: 1px solid var(--accentb2); }
+.tag-green  { background: var(--greenbg); color: var(--green); border: 1px solid var(--greenb); }
+.tag-blue   { background: var(--bluebg);  color: var(--blue);  border: 1px solid var(--blueb); }
+.tag-warn   { background: var(--warnbg);  color: var(--warn);  border: 1px solid var(--warnb); }
+.tag-red    { background: var(--redbg);   color: var(--red);   border: 1px solid var(--redb); }
+.tag-muted  { background: var(--bg2);     color: var(--text2); border: 1px solid var(--border); }
+
+/* ── LEAD CARD ── */
+.lead-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; display: grid; grid-template-columns: 1fr 210px; gap: 1.25rem; align-items: start; margin-bottom: 7px; transition: border-color .12s; padding: 0 1.25rem; height: 56px; align-items: center; overflow: hidden; }
+.lead-card.expanded { height: auto; padding: 1rem 1.25rem; align-items: start; }
+.lead-card:hover { border-color: var(--border2); }
+.lead-card.s-ny     { border-left: 3px solid var(--accent); }
+.lead-card.s-ringt  { border-left: 3px solid var(--warn); }
+.lead-card.s-tilbud { border-left: 3px solid var(--blue); }
+.lead-card.s-ferdig { border-left: 3px solid var(--green); }
+.lead-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.lead-meta { font-family: var(--mono); font-size: 10px; color: var(--text2); display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 2px; }
+
+/* ── SCORE ── */
+.score-wrap { display: flex; align-items: center; gap: 5px; }
+.score-n { font-size: 14px; font-weight: 800; min-width: 26px; letter-spacing: -.02em; }
+.score-bar { flex: 1; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; min-width: 30px; }
+.score-fill { height: 100%; border-radius: 2px; }
+
+/* ── MODAL ── */
+.modal-bg { position: fixed; inset: 0; z-index: 9000; background: rgba(26,18,10,.5); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-bg.hidden { display: none; }
+.modal { background: var(--white); border: 1px solid var(--border2); border-radius: 12px; padding: 1.75rem; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(26,18,10,.2); }
+.modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.modal-close { background: transparent; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: .2rem .4rem; border-radius: 4px; }
+.modal-close:hover { background: var(--bg2); }
+
+/* ── SECTION ── */
+.sec { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--text2); margin: 1.25rem 0 .75rem; display: flex; align-items: center; gap: .5rem; }
+.sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec:first-child { margin-top: 0; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); padding: .6rem .85rem; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: .65rem .85rem; border-bottom: 1px solid var(--bg2); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg); }
+
+/* ── PHASE STRIP ── */
+.phase-strip { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--border); background: var(--bg2); }
+.phase-block { padding: 12px 18px; border-right: 1px solid var(--border); }
+.phase-block:last-child { border-right: none; }
+.phase-block.active { background: #fff8f4; }
+.phase-label { font-family: var(--mono); font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin-bottom: 2px; }
+.phase-title { font-size: 11.5px; font-weight: 600; color: var(--text); }
+.phase-count { font-size: 22px; font-weight: 800; letter-spacing: -.03em; margin: 3px 0; -webkit-font-smoothing: antialiased; transform: translateZ(0); }
+.phase-btn { font-size: 10px; font-weight: 600; padding: 4px 9px; border-radius: 4px; border: none; cursor: pointer; }
+.phase-btn.done { background: var(--greenbg); color: var(--green); }
+.phase-btn.go   { background: var(--accent); color: #fff; }
+
+/* ── SIDEBAR ── */
+.sidebar { border-right: 1px solid var(--border); padding: 14px 11px; background: var(--bg2); min-height: calc(100vh - 46px); }
+.sidebar-label { font-family: var(--mono); font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); margin-bottom: 8px; margin-top: 12px; display: block; }
+.sidebar-label:first-child { margin-top: 0; }
+.kurs-item { display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 4px; cursor: pointer; margin-bottom: 1px; user-select: none; min-width: 0; }
+.kurs-item:hover { background: rgba(232,81,42,.05); }
+.kurs-item.on { background: rgba(232,81,42,.08); }
+.kurs-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--bg3); flex-shrink: 0; transition: background .12s; }
+.kurs-item.on .kurs-dot { background: var(--accent); }
+.kurs-name { font-size: 11px; color: var(--text2); }
+.kurs-item.on .kurs-name { color: var(--text); font-weight: 500; }
+
+/* ── SPINNER ── */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--header); color: #fff; border-radius: 8px; padding: .6rem 1rem; font-size: 12px; opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 9999; max-width: 280px; }
+#toast.show { opacity: 1; transform: none; }
+#toast.err { background: #6a1010; }
+
+/* ── FADE ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade { animation: fadeUp .25s ease both; }
+
+/* ── STATUS BAR ── */
+.status-bar { display: flex; align-items: center; gap: .6rem; padding: .55rem .9rem; background: var(--white); border: 1px solid var(--border); border-radius: 7px; font-family: var(--mono); font-size: 11px; margin-bottom: .65rem; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.idle { background: var(--bg3); }
+.status-dot.run  { background: var(--accent); animation: pulse .8s infinite; }
+.status-dot.ok   { background: var(--green); }
+.status-dot.err  { background: var(--red); }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .lead-card { grid-template-columns: 1fr; height: auto; padding: 1rem 1.25rem; }
+  .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+
+/* ── LAYOUT ── */
+.app-shell { display:none; }
+.app-shell.on { display:flex; flex-direction:column; min-height:100vh; }
+.layout { display:grid; grid-template-columns:188px 1fr; flex:1; }
+
+/* ── SIDEBAR ── */
+.sidebar { background:var(--bg2); border-right:1px solid var(--border); padding:14px 11px; overflow-y:auto; }
+.sb-sec { font-family:var(--mono); font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text3); margin:14px 0 7px; display:block; }
+.sb-sec:first-child { margin-top:0; }
+.sel-all-row { display:flex; gap:4px; margin-bottom:7px; }
+.mini-btn { font-size:10px; background:transparent; border:1px solid var(--border2); border-radius:4px; color:var(--text2); padding:3px 7px; cursor:pointer; font-family:var(--mono); transition:all .1s; }
+.mini-btn:hover { border-color:var(--accent); color:var(--accent); }
+.kurs-item { display:flex; align-items:center; gap:7px; padding:5px 7px; border-radius:4px; cursor:pointer; margin-bottom:1px; user-select:none; width:100%; background:transparent; border:none; text-align:left; }
+.kurs-item:hover { background:rgba(232,81,42,.05); }
+.kurs-item.on { background:rgba(232,81,42,.09); }
+.kurs-dot { width:5px; height:5px; border-radius:50%; background:var(--bg3); flex-shrink:0; transition:background .1s; }
+.kurs-item.on .kurs-dot { background:var(--accent); }
+.ki { display:none; } /* hide old icon span */
+.kn { font-size:11px; color:var(--text2); flex:1; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.kurs-item.on .kn { color:var(--text); font-weight:500; }
+.kurs-check { font-size:9px; color:var(--accent); opacity:0; font-weight:700; }
+.kurs-item.on .kurs-check { opacity:1; }
+/* kurs-info-btn removed — tooltip on hover */
+
+/* ── MAIN AREA ── */
+.main-area { display:flex; flex-direction:column; flex:1; background:var(--bg); }
+
+/* ── PHASE STRIP ── */
+.phases { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border); background:var(--bg2); }
+.phase { padding:13px 18px; border-right:1px solid var(--border); }
+.phase:last-child { border-right:none; }
+.phase-num { font-family:var(--mono); font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text3); margin-bottom:2px; }
+.phase-title { font-size:12px; font-weight:600; color:var(--text); }
+.phase-desc { font-size:10px; color:var(--text3); margin-top:2px; line-height:1.4; display:none; }
+.phase-count { font-size:22px; font-weight:800; letter-spacing:-.03em; margin:4px 0; color:var(--accent); }
+.phase-btn { font-size:11px; font-weight:600; padding:5px 10px; border-radius:5px; border:none; cursor:pointer; font-family:var(--sans); transition:all .12s; }
+.phase-btn.idle { background:var(--accentbg); color:#7a2808; }
+.phase-btn.idle:hover { background:var(--accent); color:#fff; }
+.phase-btn.active { background:var(--accent); color:#fff; }
+.phase-btn.done  { background:var(--greenbg); color:var(--green); }
+.phase-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ── FILTERS ── */
+.filters-row { display:flex; gap:.6rem; align-items:flex-end; flex-wrap:wrap; padding:11px 16px; border-bottom:1px solid var(--border); background:var(--bg); }
+.fg { display:flex; flex-direction:column; gap:3px; }
+.fg label { font-family:var(--mono); font-size:8.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); }
+.fg select, .fg input { background:var(--white); border:1px solid var(--border2); border-radius:5px; color:var(--text); font-family:var(--sans); font-size:12px; padding:.32rem .6rem; outline:none; cursor:pointer; transition:border-color .1s; }
+.fg select:focus, .fg input:focus { border-color:var(--accent); }
+.fg input[type=date] { font-size:11px; }
+
+/* ── STATUS + EXPORT ── */
+.status-bar { display:flex; align-items:center; gap:.6rem; padding:.5rem .9rem; background:var(--white); border:1px solid var(--border); border-radius:6px; font-family:var(--mono); font-size:11px; color:var(--text2); margin:10px 16px 0; }
+.sd { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sd.idle { background:var(--bg3); }
+.sd.run  { background:var(--accent); animation:pulse .8s infinite; }
+.sd.ok   { background:var(--green); }
+.sd.err  { background:var(--red); }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.export-row { display:flex; gap:.5rem; align-items:center; padding:10px 16px; border-bottom:1px solid var(--border); }
+
+/* ── TABLE / RESULTS ── */
+.results-wrap { flex:1; overflow:auto; padding:12px 16px; }
+.result-card { background:var(--white); border:1px solid var(--border); border-radius:8px; display:grid; grid-template-columns:1fr 68px 1fr 1fr 56px 64px 80px; align-items:center; margin-bottom:6px; transition:border-color .12s; animation:fadeUp .22s ease both; }
+.result-card:hover { border-color:var(--border2); }
+.result-card.hi { border-left:3px solid var(--accent); }
+.result-card.med { border-left:3px solid #b07040; }
+.result-card.lo { border-left:3px solid var(--border2); }
+.rc { padding:.65rem .85rem; }
+.rc-name { font-size:12.5px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.rc-sub { font-family:var(--mono); font-size:9.5px; color:var(--text2); line-height:1.4; }
+.rc-nace { font-size:10px; font-weight:600; color:var(--text); }
+.rc-nacelabel { font-size:9.5px; color:var(--text2); margin-top:1px; line-height:1.3; }
+.rc-akt { font-size:11px; color:var(--text2); font-style:italic; line-height:1.4; }
+.rc-akt em { color:var(--accent2); font-style:normal; font-weight:600; }
+.rc-akt .warn { font-size:9.5px; color:var(--warn); font-style:normal; }
+.km-wrap { display:flex; gap:3px; flex-wrap:wrap; }
+.km { font-family:var(--mono); font-size:9px; padding:2px 5px; border-radius:4px; font-weight:600; }
+.km.high { background:#eaf5ec; color:#1a5225; border:1px solid rgba(26,138,60,.2); }
+.km.med  { background:var(--warnbg); color:#7a4800; border:1px solid rgba(138,88,0,.2); }
+.km.low  { background:var(--bg2); color:var(--text3); border:1px solid var(--border); }
+.sb { display:flex; align-items:center; gap:4px; }
+.sb-t { flex:1; height:3px; background:var(--bg3); border-radius:2px; overflow:hidden; min-width:24px; }
+.sb-f { height:100%; border-radius:2px; }
+.sn  { font-size:13px; font-weight:800; min-width:22px; text-align:right; }
+.emp { font-family:var(--mono); font-size:11px; color:var(--text2); }
+.nb  { font-family:var(--mono); font-size:10px; font-weight:600; }
+.cn { font-size:12.5px; font-weight:600; color:var(--text); }
+.on { font-family:var(--mono); font-size:9.5px; color:var(--text2); margin-top:1px; }
+.at { font-size:11px; color:var(--text2); font-style:italic; line-height:1.4; }
+.at em { color:var(--accent2); font-style:normal; font-weight:600; }
+.nb { font-family:var(--mono); font-size:10px; font-weight:600; }
+
+/* Column headers */
+.results-header { display:grid; grid-template-columns:1fr 68px 1fr 1fr 56px 64px 80px; padding:0 0 5px; margin-bottom:2px; }
+.rh { font-family:var(--mono); font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); padding:0 .85rem; cursor:pointer; user-select:none; }
+.rh:hover { color:var(--text); }
+.rh.asc::after { content:' ↑'; color:var(--accent); }
+.rh.desc::after { content:' ↓'; color:var(--accent); }
+
+/* Progress */
+.prog-wrap { padding:0 16px; }
+.prog-track { height:2px; background:var(--bg3); border-radius:1px; overflow:hidden; }
+.prog-bar { height:100%; background:var(--accent); border-radius:1px; transition:width .3s; }
+
+/* Pagination */
+.pag { display:flex; justify-content:center; align-items:center; gap:.5rem; padding:1rem; font-family:var(--mono); font-size:11px; color:var(--text2); }
+.pag-btn { background:transparent; border:1px solid var(--border2); border-radius:5px; padding:.28rem .65rem; cursor:pointer; font-family:var(--mono); font-size:11px; color:var(--text2); transition:all .1s; }
+.pag-btn:hover { border-color:var(--accent); color:var(--accent); }
+.pag-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+/* Empty state */
+.empty-state { text-align:center; padding:3rem; color:var(--text3); }
+.empty-state p { font-size:13px; margin-top:.5rem; }
+
+/* Main tabs */
+.main-tab-panel { display:none; }
+.main-tab-panel.act { display:flex; flex-direction:column; flex:1; }
+.main-tab-btn { font-size:11px; font-weight:500; color:var(--text3); padding:0 14px; height:40px; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .12s; font-family:var(--sans); }
+.main-tab-btn:hover { color:var(--text); }
+.main-tab-btn.act { color:var(--text); border-bottom-color:var(--accent); font-weight:600; }
+
+/* Admin tabs */
+.admin-tab { display:none; padding:1.25rem 1.5rem; }
+.admin-tab.act { display:block; }
+.admin-selger-card { background:var(--white); border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.25rem; }
+.selger-stat-row { display:flex; gap:.5rem; flex-wrap:wrap; margin:.75rem 0; }
+.selger-stat { background:var(--bg2); border-radius:5px; padding:.35rem .65rem; flex:1; text-align:center; min-width:50px; }
+.selger-stat-n { font-size:16px; font-weight:800; letter-spacing:-.02em; }
+.selger-stat-l { font-family:var(--mono); font-size:8px; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-top:1px; }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; margin-bottom:1.25rem; }
+.chart-card { background:var(--white); border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.25rem; }
+.foresporsel-card { background:var(--white); border:1px solid var(--border); border-radius:8px; padding:.9rem 1.1rem; display:flex; align-items:start; gap:1rem; margin-bottom:.5rem; }
+
+/* Login overlay */
+.login-overlay { position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
+.login-overlay.hidden { display:none; }
+.login-box { background:var(--white); border:1px solid var(--border2); border-radius:12px; padding:2.25rem; width:380px; box-shadow:0 8px 32px rgba(26,18,10,.1); animation:fadeUp .3s ease; }
+.login-logo { display:flex; align-items:center; gap:10px; margin-bottom:1.75rem; }
+.login-logo h2 { font-size:14px; font-weight:700; color:var(--text); }
+.login-logo h2 span { color:var(--accent); }
+.login-field { margin-bottom:.9rem; }
+.login-field label { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.09em; color:var(--text3); display:block; margin-bottom:.35rem; }
+.login-btn { width:100%; background:var(--accent); color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:700; padding:.65rem; cursor:pointer; font-family:var(--sans); transition:background .12s; }
+.login-btn:hover { background:var(--accent2); }
+.login-error { display:none; font-family:var(--mono); font-size:11px; color:var(--red); text-align:center; margin-top:.6rem; }
+.login-error.show { display:block; }
+.login-footer { font-family:var(--mono); font-size:9px; color:var(--text3); text-align:center; margin-top:1.25rem; }
+
+/* Kurs tooltip */
+.kurs-tooltip { position:fixed; z-index:8000; background:var(--white); border:1px solid var(--border2); border-radius:8px; padding:.85rem 1rem; max-width:300px; box-shadow:0 8px 24px rgba(26,18,10,.12); display:none; }
+.kurs-tooltip.vis { display:block; }
+.tt-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:.6rem; }
+.tt-kw { display:flex; flex-wrap:wrap; gap:.3rem; }
+.tt-kw span { font-family:var(--mono); font-size:9px; background:var(--accentbg); color:#7a2808; border:1px solid var(--accentb2); padding:2px 6px; border-radius:4px; }
+
+/* Modals */
+.modal-bg { position:fixed; inset:0; z-index:9000; background:rgba(26,18,10,.45); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.modal-bg.hidden { display:none; }
+.modal { background:var(--white); border:1px solid var(--border2); border-radius:12px; padding:1.75rem; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:0 16px 48px rgba(26,18,10,.15); }
+.modal-title { font-size:15px; font-weight:700; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; }
+.modal-close { background:transparent; border:none; font-size:15px; color:var(--text2); cursor:pointer; padding:.2rem .4rem; border-radius:4px; }
+.modal-close:hover { background:var(--bg2); }
+.inp { width:100%; background:var(--white); border:1px solid var(--border2); border-radius:6px; color:var(--text); font-family:var(--sans); font-size:13px; padding:.5rem .8rem; outline:none; transition:border-color .12s, box-shadow .12s; }
+.inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,81,42,.1); }
+.inp::placeholder { color:var(--text3); }
+select.inp option { background:var(--white); }
+.lbl { display:block; font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--text2); margin-bottom:.35rem; }
+.sec { font-family:var(--mono); font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text2); margin:1.25rem 0 .75rem; display:flex; align-items:center; gap:.5rem; }
+.sec::after { content:''; flex:1; height:1px; background:var(--border); }
+.sec:first-child { margin-top:0; }
+#toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--header); color:#fff; border-radius:8px; padding:.6rem 1rem; font-size:12px; opacity:0; transform:translateY(6px); transition:all .2s; pointer-events:none; z-index:9999; max-width:280px; }
+#toast.show { opacity:1; transform:none; }
+#toast.err { background:#6a1010; }
+.spin { display:inline-block; width:13px; height:13px; border:2px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.stats-grid{grid-template-columns:repeat(2,1fr)!important;}}
+
+/* ── SPLASH ── */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .5s ease, transform .5s ease;
+}
+.splash.hide {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+.splash.gone { display: none !important; }
+.splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  max-width: 420px;
+  padding: 2rem;
+}
+.splash-mark {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: .5rem;
+}
+.splash-sq {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.splash-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.04em;
+  line-height: 1;
+}
+.splash-title b { color: var(--accent); }
+.splash-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--text3);
+  margin-top: .25rem;
+}
+.splash-dev {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2rem;
+}
+.splash-dev span { color: var(--text2); }
+.splash-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  padding: .7rem 2rem;
+  cursor: pointer;
+  transition: background .12s;
+  margin-top: .5rem;
+}
+.splash-btn:hover { background: var(--accent2); }
+.splash-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--border2);
+}
+
+/* ── FOOTER ── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: .75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.footer-copy {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text3);
+}
+.footer-dev {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text3);
+}
+.footer-dev span { color: var(--text2); }
+
+</style>
+</head>
+<body>
+
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="36" height="36" viewBox="0 0 56 56" fill="none">
+        <rect x="4" y="4" width="20" height="20" rx="3" fill="#e85d26"/>
+        <rect x="32" y="4" width="20" height="20" rx="3" fill="#e85d26" opacity=".4"/>
+        <rect x="4" y="32" width="20" height="20" rx="3" fill="#e85d26" opacity=".4"/>
+        <rect x="32" y="32" width="20" height="20" rx="3" fill="#e85d26" opacity=".2"/>
+      </svg>
+      <div>
+        <div class="login-brand">Systemfag <span>Leads</span></div>
+        <div class="login-sub">Internt salgsverktøy</div>
+      </div>
+    </div>
+    <div class="login-title">Velkommen</div>
+    <div class="login-desc">Skriv inn passordet for å starte.</div>
+    <div class="login-field">
+      <label>Passord</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginCheck()"/>
+    </div>
+    <button class="login-btn" onclick="loginCheck()">Logg inn →</button>
+    <div class="login-error" id="loginError">Feil brukernavn eller passord.</div>
+    <div class="login-footer">Systemfag Norge AS · Internt verktøy</div>
+  </div>
+</div>
+
+
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div>
+      <div class="splash-mark">
+        <div class="splash-sq"></div>
+        <div class="splash-sq" style="opacity:.4"></div>
+        <div class="splash-sq" style="opacity:.4"></div>
+        <div class="splash-sq" style="opacity:.15"></div>
+      </div>
+    </div>
+    <div>
+      <div class="splash-title">Systemfag <b>Leads</b></div>
+      <div class="splash-sub">Prospekterings- og salgsverktøy</div>
+    </div>
+    <div class="splash-divider"></div>
+    <button class="splash-btn" onclick="startApp()">Start prospektering</button>
+    <div class="splash-dev">Utviklet av <span>Martin Haugom Engedahl</span></div>
+  </div>
+</div>
+
+
+<div id="app" class="app-shell">
+  <div class="topbar">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;flex-shrink:0;">
+      <div style="width:6px;height:6px;border-radius:1.5px;background:var(--accent);"></div>
+      <div style="width:6px;height:6px;border-radius:1.5px;background:var(--accent);opacity:.4;"></div>
+      <div style="width:6px;height:6px;border-radius:1.5px;background:var(--accent);opacity:.4;"></div>
+      <div style="width:6px;height:6px;border-radius:1.5px;background:var(--accent);opacity:.15;"></div>
+    </div>
+    <span style="font-size:12px;font-weight:700;color:#fff;letter-spacing:-.01em;">Systemfag <b style="color:var(--accent);">Leads</b></span>
+    <div class="topbar-sep" style="width:1px;height:14px;background:rgba(255,255,255,.1);"></div>
+    <div style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);">
+      <div style="width:5px;height:5px;border-radius:50%;background:#4ade80;"></div>Live
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem;">
+      <span id="envBadge" style="display:none;font-family:var(--mono);font-size:9px;"></span>
+      <button onclick="sessionStorage.clear();window.location.href='index.html'" style="font-family:var(--mono);font-size:10px;padding:.25rem .6rem;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.45);cursor:pointer;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Logg ut</button>
+    </div>
+  </div>
+
+  <!-- MAIN TABS NAV -->
+  <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 20px;">
+    <button class="main-tab-btn act" onclick="switchMainTab('prospektering',this)">Prospektering</button>
+    <button class="main-tab-btn" onclick="switchMainTab('admin',this)">Admin</button>
+  </div>
+
+  <!-- PROSPEKTERING TAB -->
+  <div id="main-tab-prospektering" class="main-tab-panel act">
+    <div class="layout">
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <span class="sb-sec">Velg kurs</span>
+        <div class="sel-all-row">
+          <button class="mini-btn" onclick="selectAll()">Velg alle</button>
+          <button class="mini-btn" onclick="selectNone()">Ingen</button>
+        </div>
+        <div id="kursList"></div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main-area">
+
+        <!-- PHASE STRIP -->
+        <div class="phases">
+          <div class="phase" id="ph1">
+            <div class="phase-num">01 — Skann</div>
+            <div class="phase-title">Hent bedrifter</div>
+            <div class="phase-count" id="ph1c">–</div>
+            <button class="phase-btn idle" id="btn1" onclick="fase1()">Start skanning</button>
+          </div>
+          <div class="phase" id="ph2">
+            <div class="phase-num">02 — Les</div>
+            <div class="phase-title">Aktivitetsfelt</div>
+            <div class="phase-count" id="ph2c">–</div>
+            <button class="phase-btn idle" id="btn2" onclick="fase2()" disabled>Les aktivitetsfelt</button>
+          </div>
+          <div class="phase" id="ph3">
+            <div class="phase-num">03 — Score</div>
+            <div class="phase-title">Nøkkelord-match</div>
+            <div class="phase-count" id="ph3c">–</div>
+            <button class="phase-btn idle" id="btn3" onclick="fase3()" disabled>Score og ranger</button>
+          </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filters-row">
+          <div class="fg">
+            <label>Bransje (NACE)</label>
+            <select id="selNace">
+      <option value="alle">Alle bransjer</option>
+      <optgroup label="— Bygg og anlegg —">
+        <option value="41">41 – Oppføring av bygninger</option>
+        <option value="42">42 – Anleggsvirksomhet</option>
+        <option value="43">43 – Spesialisert bygge/anlegg</option>
+        <option value="43.2">43.2 – El, VVS, andre installasjoner</option>
+      </optgroup>
+      <optgroup label="— Eiendom og drift —">
+        <option value="68.2">68.2 – Utleie av eiendom</option>
+        <option value="68.3">68.3 – Eiendomsforvaltning</option>
+        <option value="81.1">81.1 – Vaktmester/kombinert eiendom</option>
+        <option value="81.2">81.2 – Rengjøring</option>
+        <option value="81.3">81.3 – Landskap/grøntanlegg</option>
+      </optgroup>
+      <optgroup label="— Industri og produksjon —">
+        <option value="10">10 – Næringsmidler</option>
+        <option value="13">13 – Tekstil</option>
+        <option value="15">15 – Lær og skinn</option>
+        <option value="16">16 – Trelast/trevarer</option>
+        <option value="17">17 – Papir</option>
+        <option value="19">19 – Oljeraffinering</option>
+        <option value="20">20 – Kjemikalier</option>
+        <option value="22">22 – Gummi/plast</option>
+        <option value="23">23 – Mineralske produkter</option>
+        <option value="24">24 – Metaller</option>
+        <option value="25">25 – Metallvarer</option>
+        <option value="26">26 – Elektronikk</option>
+        <option value="27">27 – Elektrisk utstyr</option>
+        <option value="28">28 – Maskiner</option>
+        <option value="29">29 – Kjøretøy</option>
+        <option value="30">30 – Annet transportutstyr</option>
+        <option value="31">31 – Møbler</option>
+        <option value="32">32 – Annen industri</option>
+        <option value="33">33 – Reparasjon/installasjon maskiner</option>
+      </optgroup>
+      <optgroup label="— Elektro og energi —">
+        <option value="35">35 – Kraftforsyning</option>
+        <option value="36">36 – Vannforsyning</option>
+        <option value="37">37 – Avløp</option>
+        <option value="38">38 – Avfallshåndtering</option>
+        <option value="39">39 – Miljøopprydding</option>
+      </optgroup>
+      <optgroup label="— Transport og lagring —">
+        <option value="49">49 – Landtransport</option>
+        <option value="50">50 – Sjøtransport</option>
+        <option value="51">51 – Lufttransport</option>
+        <option value="52">52 – Lagring og tjenester tilknyttet transport</option>
+        <option value="53">53 – Post og distribusjon</option>
+      </optgroup>
+      <optgroup label="— Olje, gass og bergverk —">
+        <option value="05">05 – Bryting av kull</option>
+        <option value="06">06 – Utvinning av råolje/naturgass</option>
+        <option value="07">07 – Bryting av jernmalm</option>
+        <option value="08">08 – Bryting av stein og mineraler</option>
+        <option value="09">09 – Tjenester til bergverk/olje/gass</option>
+      </optgroup>
+      <optgroup label="— Primærnæring —">
+        <option value="01">01 – Jordbruk og husdyrhold</option>
+        <option value="02">02 – Skogbruk</option>
+        <option value="03">03 – Fiske og akvakultur</option>
+      </optgroup>
+      <optgroup label="— Mekaniker og bilbransje —">
+        <option value="45.1">45.1 – Handel med bil</option>
+        <option value="45.2">45.2 – Reparasjon/vedlikehold av motorvogner</option>
+        <option value="45.3">45.3 – Deler og tilbehør</option>
+        <option value="45.4">45.4 – Handel/rep. motorsykler</option>
+      </optgroup>
+      <optgroup label="— Utleie og bemanning —">
+        <option value="77">77 – Utleie og leasing</option>
+        <option value="78">78 – Arbeidsformidling og bemanning</option>
+        <option value="79">79 – Reisebyrå og turoperatør</option>
+        <option value="80">80 – Vaktvirksomhet og etterforskning</option>
+      </optgroup>
+      <optgroup label="— Maritim —">
+        <option value="30.1">30.1 – Bygging av skip og båter</option>
+        <option value="50.1">50.1 – Sjøfart innenriks</option>
+        <option value="50.2">50.2 – Sjøfart utenriks</option>
+        <option value="52.2">52.2 – Tjenester for sjøtransport</option>
+      </optgroup>
+      <optgroup label="— Helse og omsorg —">
+        <option value="86">86 – Helsetjenester</option>
+        <option value="87">87 – Pleie og omsorgstjenester</option>
+        <option value="88">88 – Sosiale tjenester uten botilbud</option>
+      </optgroup>
+      <optgroup label="— Handel og service —">
+        <option value="45">45 – Handel med kjøretøy</option>
+        <option value="46">46 – Agentur- og engroshandel</option>
+        <option value="47">47 – Detaljhandel</option>
+        <option value="55">55 – Overnatting</option>
+        <option value="56">56 – Serveringsvirksomhet</option>
+      </optgroup>
+      <optgroup label="— Teknisk og konsulent —">
+        <option value="71">71 – Arkitekt og teknisk konsulent</option>
+        <option value="72">72 – Forskning og utvikling</option>
+        <option value="73">73 – Reklame og markedsanalyse</option>
+        <option value="74">74 – Annen faglig virksomhet</option>
+        <option value="75">75 – Veterinærtjenester</option>
+      </optgroup>
+      <optgroup label="— Utdanning —">
+        <option value="85">85 – Undervisning</option>
+      </optgroup>
+      <optgroup label="— Øvrig —">
+        <option value="58">58 – Forlagsvirksomhet</option>
+        <option value="61">61 – Telekommunikasjon</option>
+        <option value="62">62 – IKT-tjenester</option>
+        <option value="63">63 – Informasjonstjenester</option>
+        <option value="64">64 – Finansiell tjenesteyting</option>
+        <option value="68.1">68.1 – Kjøp og salg av eiendom</option>
+        <option value="84">84 – Offentlig forvaltning</option>
+        <option value="90">90 – Kultur og underholdning</option>
+        <option value="93">93 – Sport og fritid</option>
+        <option value="95">95 – Rep. datamaskiner og husholdningsvarer</option>
+        <option value="96">96 – Annen personlig tjenesteyting</option>
+      </optgroup>
+    </select>
+          </div>
+          <div class="fg">
+            <label>Fylke</label>
+            <select id="selFylke">
+        <option value="">Alle fylker</option>
+        <option value="0301">Oslo</option>
+        <option value="32">Akershus</option>
+        <option value="34">Innlandet</option>
+        <option value="38">Vestfold</option>
+        <option value="42">Agder</option>
+        <option value="11">Rogaland</option>
+        <option value="46">Vestland</option>
+        <option value="15">Møre og Romsdal</option>
+        <option value="50">Trøndelag</option>
+        <option value="18">Nordland</option>
+        <option value="54">Troms</option>
+        <option value="56">Finnmark</option>
+      </select>
+          </div>
+          <div class="fg">
+            <label>Organisasjonsform</label>
+            <select id="selOrgform">
+        <option value="">Alle typer</option>
+        <option value="AS">AS – Aksjeselskap</option>
+        <option value="ASA">ASA – Allmennaksjeselskap</option>
+        <option value="ENK">ENK – Enkeltpersonforetak</option>
+        <option value="ANS">ANS – Ansvarlig selskap</option>
+        <option value="DA">DA – Delt ansvar</option>
+        <option value="SA">SA – Samvirkeforetak</option>
+        <option value="BA">BA – Selskap med begrenset ansvar</option>
+        <option value="STI">STI – Stiftelse</option>
+        <option value="FLI">FLI – Forening/lag/innretning</option>
+        <option value="KF">KF – Kommunalt foretak</option>
+        <option value="FYLKF">FYLKF – Fylkeskommunalt foretak</option>
+        <option value="SF">SF – Statsforetak</option>
+        <option value="NUF">NUF – Norskregistrert utenlandsk foretak</option>
+        <option value="ESEK">ESEK – Eierseksjonssameie</option>
+        <option value="BRL">BRL – Borettslag</option>
+      </select>
+          </div>
+          <div class="fg">
+            <label>Maks antall</label>
+            <select id="selMax">
+        <option value="50">50</option>
+        <option value="100" selected>100</option>
+        <option value="200">200</option>
+        <option value="500">500</option>
+        <option value="9999">Ingen grense</option>
+      </select>
+          </div>
+          <div class="fg">
+            <label>Reg. etter</label>
+            <input type="date" id="datoFra"/>
+          </div>
+          <div class="fg">
+            <label>Reg. før</label>
+            <input type="date" id="datoTil"/>
+          </div>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="prog-wrap" style="padding-top:8px;">
+          <div class="prog-track"><div class="prog-bar" id="prog" style="width:0%"></div></div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="statusBar">
+          <div class="sd idle" id="statusDot"></div>
+          <span id="statusMsg">Klar — velg kurs og parametere, start Fase 1.</span>
+        </div>
+
+        <!-- EXPORT ROW -->
+        <div class="export-row" id="exportRow" style="display:none;">
+          <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:.35rem .8rem;" onclick="exportCSV()">CSV</button>
+          <button class="btn" style="font-size:11px;padding:.35rem .9rem;" onclick="exportExcel()">Eksporter til Excel</button>
+          <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:.35rem .8rem;" onclick="copyList()">Kopier liste</button>
+          <button class="btn" style="font-size:11px;padding:.35rem .9rem;background:#1a5fa0;" onclick="visTildelAlle()">Tildel alle til selgere</button>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results-wrap" id="resultsWrap">
+          <div class="results-header">
+            <div class="rh" onclick="sortBy('navn')">Bedrift</div>
+            <div class="rh" onclick="sortBy('nace_kode')">NACE</div>
+            <div class="rh">Aktivitet</div>
+            <div class="rh">Kurs</div>
+            <div class="rh" onclick="sortBy('score')">Score</div>
+            <div class="rh" onclick="sortBy('ansatte')">Ansatte</div>
+            <div class="rh" onclick="sortBy('opprettet')">Reg. dato</div>
+          </div>
+          <div id="resultsBody">
+            <div class="empty-state">
+              <div style="width:32px;height:32px;border-radius:6px;background:var(--bg3);margin:0 auto .75rem;"></div>
+              <p>Velg kurs og start Fase 1 for å hente leads.</p>
+            </div>
+          </div>
+          <div class="pag" id="pag" style="display:none;">
+            <button class="pag-btn" id="pagPrev" onclick="prevPage()">← Forrige</button>
+            <span id="pagInfo"></span>
+            <button class="pag-btn" id="pagNext" onclick="nextPage()">Neste →</button>
+          </div>
+        </div>
+
+        <!-- LEGACY TABLE (hidden, keep for JS compatibility) -->
+        <div style="display:none;">
+          <table><tbody id="tbody"></tbody></table>
+        </div>
+
+      </div><!-- /main-area -->
+    </div><!-- /layout -->
+  </div><!-- /prospektering tab -->
+
+  <!-- ADMIN TAB -->
+  <div id="main-tab-admin" class="main-tab-panel">
+    <div id="adminLoginOverlay" style="display:flex;align-items:center;justify-content:center;padding:4rem 2rem;">
+      <div style="background:var(--white);border:1px solid var(--border2);border-radius:12px;padding:2.25rem;width:360px;box-shadow:0 8px 32px rgba(26,18,10,.1);">
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:.35rem;">Admin-innlogging</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:1.5rem;">Kun for administrator.</div>
+        <label class="lbl">Passord</label>
+        <input class="inp" type="password" id="adminTabPass" placeholder="••••••••" style="margin-bottom:.75rem;" onkeydown="if(event.key==='Enter')adminTabLogin()"/>
+        <button class="btn" style="width:100%;font-size:13px;padding:.65rem;" onclick="adminTabLogin()">Logg inn</button>
+        <div id="adminTabErr" style="color:var(--red);font-family:var(--mono);font-size:11px;margin-top:.5rem;display:none;text-align:center;">Feil passord.</div>
+      </div>
+    </div>
+    <div id="adminContent" style="display:none;">
+      <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 20px;">
+        <button class="main-tab-btn act" onclick="switchAdminTab('oversikt',this)">Oversikt</button>
+        <button class="main-tab-btn" onclick="switchAdminTab('selgere',this)">Selgere</button>
+        <button class="main-tab-btn" onclick="switchAdminTab('foresporsler',this)">Forespørsler <span id="forspBadge2" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;margin-left:3px;">0</span></button>
+        <button class="main-tab-btn" onclick="switchAdminTab('salg',this)">Salg</button>
+      </div>
+      <div class="admin-tab act" id="atab-oversikt">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-n" style="color:var(--accent)" id="aStLeads">–</div><div class="stat-l">Totale leads</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--green)" id="aStSalg">–</div><div class="stat-l">Registrerte salg</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:#1a5fa0" id="aStOmsetning">–</div><div class="stat-l">Total omsetning</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--warn)" id="aStKonv">–</div><div class="stat-l">Konverteringsrate</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+          <div class="chart-card"><div class="sec">Salg per selger</div><canvas id="aChartSelgere" height="200"></canvas></div>
+          <div class="chart-card"><div class="sec">Topp kurs solgt</div><canvas id="aChartKurs" height="200"></canvas></div>
+        </div>
+        <div class="chart-card"><div class="sec">Lead-status</div><canvas id="aChartStatus" height="75"></canvas></div>
+      </div>
+      <div class="admin-tab" id="atab-selgere">
+        <div class="sec">Alle selgere</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem;margin-bottom:2rem;" id="aSelgerCards"></div>
+        <div class="sec">Legg til ny selger</div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1.25rem;max-width:460px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem;">
+            <div><label class="lbl">Fullt navn</label><input class="inp" id="aNyNavn" placeholder="Ola Nordmann"/></div>
+            <div><label class="lbl">Brukernavn</label><input class="inp" id="aNyUser" placeholder="ola@systemfag.no"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.85rem;">
+            <div><label class="lbl">Passord</label><input class="inp" type="password" id="aNyPass" placeholder="Min. 6 tegn"/></div>
+            <div><label class="lbl">Bekreft</label><input class="inp" type="password" id="aNyPass2"/></div>
+          </div>
+          <button class="btn" id="aAddBtn" onclick="aLeggTilSelger()">Legg til selger</button>
+          <div id="aAddMsg" style="font-family:var(--mono);font-size:11px;margin-top:.6rem;"></div>
+        </div>
+      </div>
+      <div class="admin-tab" id="atab-foresporsler">
+        <div class="sec">Ventende forespørsler</div>
+        <div id="aForspListe"></div>
+      </div>
+      <div class="admin-tab" id="atab-salg">
+        <div class="sec">Alle registrerte salg</div>
+        <div id="aSalgListe"></div>
+      </div>
+    </div>
+  </div><!-- /admin tab -->
+
+</div><!-- /app -->
+
+<!-- ADMIN PANEL MODAL -->
+<div class="modal-bg hidden" id="adminModal" onclick="if(event.target===this)lukkAdmin()">
+  <div class="modal">
+    <div class="modal-title">
+      <span>👥 Selgeradministrasjon</span>
+      <button class="modal-close" onclick="lukkAdmin()">✕</button>
+    </div>
+    <div class="selger-list" id="selgerListAdmin"></div>
+    <div class="add-selger-form">
+      <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem;">Legg til ny selger</div>
+      <div class="form-row">
+        <input type="text" id="nyNavn" placeholder="Fullt navn"/>
+        <input type="text" id="nyBrukernavn" placeholder="brukernavn"/>
+      </div>
+      <div class="form-row">
+        <input type="password" id="nyPassord" placeholder="Passord"/>
+        <input type="password" id="nyPassord2" placeholder="Bekreft passord"/>
+      </div>
+      <button class="add-btn" id="addSelgerBtn" onclick="leggTilSelger()">+ Legg til selger</button>
+      <div class="modal-msg" id="modalMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN TAB -->
+<div id="main-tab-admin" class="main-tab-panel" style="padding:0;">
+
+  <!-- ADMIN LOGIN OVERLAY (shown if not authed) -->
+  <div id="adminLoginOverlay" style="display:flex;align-items:center;justify-content:center;padding:4rem 2rem;">
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:2.5rem 2.25rem;width:360px;box-shadow:0 40px 100px rgba(0,0,0,.5);">
+      <div style="font-family:var(--display);font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:.35rem;">⚙️ Admin-innlogging</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem;">Kun for administrator.</div>
+      <label style="display:block;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem;">Passord</label>
+      <input class="inp" type="password" id="adminTabPass" placeholder="••••••••" style="margin-bottom:.75rem;" onkeydown="if(event.key==='Enter')adminTabLogin()"/>
+      <button class="btn" style="width:100%;" onclick="adminTabLogin()">Logg inn →</button>
+      <div id="adminTabErr" style="color:#fca5a5;font-size:.75rem;font-family:var(--mono);margin-top:.5rem;display:none;text-align:center;">Feil passord.</div>
+    </div>
+  </div>
+
+  <!-- ADMIN CONTENT (hidden until login) -->
+  <div id="adminContent" style="display:none;">
+
+    <div class="nav" style="margin-bottom:0;">
+      <button class="nav-btn act" onclick="switchAdminTab('oversikt',this)">📊 Oversikt</button>
+      <button class="nav-btn" onclick="switchAdminTab('selgere',this)">👥 Selgere</button>
+      <button class="nav-btn" onclick="switchAdminTab('foresporsler',this)">📬 Forespørsler <span id="forspBadge2" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:.05rem .4rem;font-size:.62rem;margin-left:.25rem;">0</span></button>
+      <button class="nav-btn" onclick="switchAdminTab('salg',this)">💰 Salg</button>
+    </div>
+
+    <!-- OVERSIKT -->
+    <div class="admin-tab act" id="atab-oversikt" style="padding:1.75rem 2rem;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem;" id="adminStatsRow">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;">
+          <div style="font-family:var(--display);font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1;" id="aStLeads">–</div>
+          <div style="font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.3rem;">Totale leads</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;">
+          <div style="font-family:var(--display);font-size:1.8rem;font-weight:800;color:var(--success);line-height:1;" id="aStSalg">–</div>
+          <div style="font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.3rem;">Registrerte salg</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;">
+          <div style="font-family:var(--display);font-size:1.8rem;font-weight:800;color:var(--accent2);line-height:1;" id="aStOmsetning">–</div>
+          <div style="font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.3rem;">Total omsetning</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;">
+          <div style="font-family:var(--display);font-size:1.8rem;font-weight:800;color:var(--warn);line-height:1;" id="aStKonv">–</div>
+          <div style="font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.3rem;">Konverteringsrate</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:1rem;">Salg per selger</div>
+          <canvas id="aChartSelgere" height="200"></canvas>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:1rem;">Topp kurs solgt</div>
+          <canvas id="aChartKurs" height="200"></canvas>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;">
+        <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:1rem;">Lead-status fordeling</div>
+        <canvas id="aChartStatus" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- SELGERE -->
+    <div class="admin-tab" id="atab-selgere" style="padding:1.75rem 2rem;display:none;">
+      <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">Alle selgere<span style="flex:1;height:1px;background:var(--border);"></span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;" id="aSelgerCards"></div>
+      <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">Legg til ny selger<span style="flex:1;height:1px;background:var(--border);"></span></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;max-width:500px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem;">
+          <div><label style="display:block;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.35rem;">Fullt navn</label><input class="inp" id="aNyNavn" placeholder="Ola Nordmann"/></div>
+          <div><label style="display:block;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.35rem;">Brukernavn</label><input class="inp" id="aNyUser" placeholder="ola.nordmann"/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem;">
+          <div><label style="display:block;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.35rem;">Passord</label><input class="inp" type="password" id="aNyPass" placeholder="Min. 6 tegn"/></div>
+          <div><label style="display:block;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.35rem;">Bekreft</label><input class="inp" type="password" id="aNyPass2" placeholder=""/></div>
+        </div>
+        <button class="btn" id="aAddBtn" onclick="aLeggTilSelger()">+ Legg til selger</button>
+        <div id="aAddMsg" style="font-family:var(--mono);font-size:.72rem;margin-top:.65rem;"></div>
+      </div>
+    </div>
+
+    <!-- FORESPØRSLER -->
+    <div class="admin-tab" id="atab-foresporsler" style="padding:1.75rem 2rem;display:none;">
+      <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">Ventende forespørsler<span style="flex:1;height:1px;background:var(--border);"></span></div>
+      <div id="aForspListe"></div>
+    </div>
+
+    <!-- SALG -->
+    <div class="admin-tab" id="atab-salg" style="padding:1.75rem 2rem;display:none;">
+      <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">Alle registrerte salg<span style="flex:1;height:1px;background:var(--border);"></span></div>
+      <div id="aSalgListe"></div>
+    </div>
+
+  </div><!-- /adminContent -->
+</div><!-- /main-tab-admin -->
+
+
+<!-- TILDEL ALLE MODAL -->
+<div class="modal-bg hidden" id="tildelAlleModal" onclick="if(event.target===this)lukkTildelAlle()">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">
+      <span>🎯 Tildel alle leads til selgere</span>
+      <button class="modal-close" onclick="lukkTildelAlle()">✕</button>
+    </div>
+    <div id="tildelAlleInfo" style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem;"></div>
+    <div id="tildelAlleSelgere" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem;"></div>
+    <div style="background:var(--surface2);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6;">
+      <strong style="color:var(--text);">Fordelingslogikk:</strong><br>
+      Leads sorteres på score og fordeles rettferdig.<br>
+      90+ score deles først, deretter 80+, 70+, og resten.<br>
+      Leads som allerede er tildelt hoppes over.
+    </div>
+    <div style="display:flex;gap:.75rem;">
+      <button class="btn" id="tildelAlleBtn" onclick="tildelAlleTilSelgere()" style="flex:1;">🎯 Fordel nå</button>
+      <button class="btn sec" onclick="lukkTildelAlle()" style="flex:1;">Avbryt</button>
+    </div>
+    <div id="tildelAlleMsg" style="font-family:var(--mono);font-size:.72rem;text-align:center;margin-top:.75rem;"></div>
+  </div>
+</div>
+
+
+
+<div id="kurs-tooltip" class="kurs-tooltip">
+  <div class="tt-title" id="tt-title"></div>
+  <div class="tt-kw" id="tt-kw"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+
+// ── LOGIN ────────────────────────────────────────────────────────────────────
+// Endre passord: bytt ut hash-verdien nedenfor.
+// Generer ny hash i nettleserkonsollen (F12):
+//   crypto.subtle.digest('SHA-256',new TextEncoder().encode('dittPassord'))
+//     .then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''))
+//     .then(console.log)
+const SF_PASS_HASH = '44b985d55f5f696cf3c96f058dd48bf2f72808d527fc9251ad679ba77b9d25dd';
+// Standard passord: Systemfag2025
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+async function loginCheck() {
+  const pass = document.getElementById('loginPass').value || '';
+  const err  = document.getElementById('loginError');
+  err.classList.remove('show');
+  if (!pass) { err.textContent = 'Skriv inn passordet.'; err.classList.add('show'); return; }
+  const hash = await sha256(pass);
+  if (hash === SF_PASS_HASH) {
+    sessionStorage.setItem('sf_auth', '1');
+    document.getElementById('loginOverlay').classList.add('hidden');
+    // Vis splash screen etter innlogging
+    document.getElementById('splash').style.display = 'flex';
+  } else {
+    err.textContent = 'Feil passord. Prøv igjen.';
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+(function() {
+  if (!sessionStorage.getItem('sf_auth')) {
+    window.location.href = 'index.html';
+    return;
+  }
+  if (sessionStorage.getItem('sf_auth')) {
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('splash').style.display = 'flex';
+  }
+})();
+
+// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+const SB_URL = 'https://oijyvobmacigkbsugvvm.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9panl2b2JtYWNpZ2tic3VndnZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODcxOTEsImV4cCI6MjA4OTI2MzE5MX0.Zg17wUXRwSjqUKndxw0gNrmAJLawglz-oMNSuLflt-s';
+const SB_HDR = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+async function sb(method, table, body, params='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${params}`, {
+    method, headers: SB_HDR, body: body ? JSON.stringify(body) : undefined
+  });
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  return r.status === 204 ? null : r.json();
+}
+
+let sbSelgere = []; // cache selgerliste
+
+async function lastSelgere() {
+  try {
+    sbSelgere = await sb('GET', 'selgere', null, '?select=brukernavn,navn&order=navn') || [];
+  } catch(e) { console.warn('Kunne ikke hente selgere:', e.message); }
+}
+
+async function tildelLead(r, selgerBrukernavn) {
+  const kurs_treff = (r.kurs_treff||[]).map(t => ({ kurs: t.kurs, prioritet: t.prioritet, matchedKw: t.matchedKw }));
+  // Use upsert with Prefer: resolution=merge-duplicates so same orgnr just updates
+  const res = await fetch(SB_URL+'/rest/v1/leads', {
+    method: 'POST',
+    headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({
+      orgnr: r.orgnr, navn: r.navn, nace_kode: r.nace_kode, nace_label: r.nace_label,
+      sted: r.sted, aktivitet: (r.aktivitet||'').slice(0, 500),
+      score: r.score, kurs_treff, tildelt_til: selgerBrukernavn,
+      tildelt_av: 'admin', status: 'ny', notat: ''
+    })
+  });
+  if (!res.ok) throw new Error(res.status + ' ' + await res.text());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ALLE KURS FRA SYSTEMFAG.NO med nøkkelord
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SUPABASE KONFIGURASJON
+// Fyll inn URL og nøkkel fra supabase.com → prosjekt → Settings → API
+// ══════════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = '';  // eks: https://abcdef.supabase.co
+const SUPABASE_KEY = '';  // anon/public key
+
+// Selgere som kan motta leads
+const SELGERE = ['Selger 1', 'Selger 2', 'Selger 3'];
+
+async function sbPost(body) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    toast('Supabase ikke konfigurert — se HTML-filen', true); return false;
+  }
+  const res = await fetch(SUPABASE_URL + '/rest/v1/leads', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'resolution=merge-duplicates',
+    },
+    body: JSON.stringify(body),
+  });
+  return res.ok;
+}
+
+let valgteLead = new Set();
+
+function toggleVelgLead(orgnr, e) {
+  e.stopPropagation();
+  valgteLead.has(orgnr) ? valgteLead.delete(orgnr) : valgteLead.add(orgnr);
+  oppdaterTildelBar();
+  renderResults();
+}
+
+function velgAlleSynlige() {
+  results.filter(r => r.kurs_treff?.length > 0).forEach(r => valgteLead.add(r.orgnr));
+  oppdaterTildelBar(); renderResults();
+}
+
+function fjernAlleValgte() {
+  valgteLead.clear(); oppdaterTildelBar(); renderResults();
+}
+
+function oppdaterTildelBar() {
+  const bar = document.getElementById('tildelBar');
+  if (!bar) return;
+  bar.style.display = valgteLead.size > 0 ? 'flex' : 'none';
+  document.getElementById('tildelAntall').textContent = valgteLead.size + ' leads valgt';
+}
+
+async function gjennomfoerTildeling() {
+  const selEl = document.getElementById('tildelSelger');
+  const btnEl = document.getElementById('tildelBtn');
+  if (!selEl) { toast('Bruk "Tildel alle" knappen i stedet', true); return; }
+  const sel = selEl.value;
+  if (!sel) { toast('Velg en selger', true); return; }
+  const btn = btnEl;
+  if (btn) { btn.disabled = true; btn.textContent = 'Tildeler…'; }
+  const rader = [...valgteLead].map(orgnr => {
+    const r = results.find(x => x.orgnr === orgnr) || {};
+    return {
+      orgnr, selger: sel, status: 'Ikke kontaktet',
+      navn: r.navn||'', sted: r.sted||'', nace_kode: r.nace_kode||'',
+      nace_label: r.nace_label||'', aktivitet: (r.aktivitet||'').slice(0,300),
+      ansatte: r.ansatte||0, score: r.score||0,
+      kurs: (r.kurs_treff||[]).map(t=>t.kurs).join(', '),
+      tildelt_dato: new Date().toISOString(),
+    };
+  });
+  const ok = await sbPost(rader);
+  btn.disabled = false; btn.textContent = '→ Tildel';
+  if (ok) {
+    toast(`✓ ${rader.length} leads tildelt ${sel}`);
+    valgteLead.clear(); oppdaterTildelBar(); renderResults();
+  } else {
+    toast('Feil ved tildeling — sjekk Supabase-konfig', true);
+  }
+}
+
+const KURS_DEF = {
+
+  // ── STILLAS ─────────────────────────────────────────────────────────────────
+  'Stillas bruker': {
+    icon:'🏗️', kategori:'Stillas & Høydearbeid',
+    keywords:['stillas','stillasarbeid','stillasmontering','stillasbygger','stillas bruker',
+      'rigg','rigging','fasadearbeid','fasadestillas','rullestillas','arbeidsplatform',
+      'byggeplass','stillasbygger','entrepenør','vedlikehold bygg'],
+    nace_bonus:['41.20','43.99','43.29','43.91','77.32'],
+    base_nace:['41','42','43','81.10','77']
+  },
+  'Stillas 2–5m': {
+    icon:'🏗️', kategori:'Stillas & Høydearbeid',
+    keywords:['stillas','stillasmontering','stillasmontør','stillasbygg','fasadestillas',
+      'arbeidsplatform','scaffold','stillasinspeksjon','stillas kontroll'],
+    nace_bonus:['41.20','43.99','43.29','77.32'],
+    base_nace:['41','42','43','77']
+  },
+  'Stillas 5–9m': {
+    icon:'🏗️', kategori:'Stillas & Høydearbeid',
+    keywords:['stillas','høystillas','stillasmontør','fasadestillas','tårnstillas',
+      'høyt stillas','stillas inspeksjon','komplekst stillas'],
+    nace_bonus:['41.20','43.99','77.32'],
+    base_nace:['41','42','43']
+  },
+  'Lift / Personløfter': {
+    icon:'🛗', kategori:'Stillas & Høydearbeid',
+    keywords:['lift','personløfter','skylift','arbeidslift','sakselift','bomlift',
+      'arbeidskurv','teleskoplift','høydearbeid','atkomst','avsperring',
+      'liftarbeider','høydeplattform','arbeid i høyden','lift og stillas'],
+    nace_bonus:['41.20','43.99','43.29','81.10','81.30','77.32','02.10'],
+    base_nace:['41','42','43','81','77','02']
+  },
+  'Arbeid i høyden / Fallsikring': {
+    icon:'🧗', kategori:'Stillas & Høydearbeid',
+    keywords:['fallsikring','fallsikringsutstyr','høydearbeid','falldemper','ankerpunkt',
+      'klatring','arbeid i høyden','takarbeid','mast','tårn','vindmølle','stige',
+      'fallbeskyttelse','sikringstau','klatresele','redningssele','personlig verneutstyr høyde',
+      'tau til sikring','sikringsutstyr',
+      // Skogbruk i høyden
+      'trearbeid i høyde','borklatring'],
+    nace_bonus:['43.91','41.20','43.99','35.11','02.10','02.20'],
+    base_nace:['41','42','43','35','02']
+  },
+
+  // ── VARME ARBEIDER & BRANN ───────────────────────────────────────────────────
+  'Varme Arbeider': {
+    icon:'🔥', kategori:'Varme & Brann',
+    keywords:['varme arbeider','varmt arbeid','åpen flamme','brenner','sveising','sveise',
+      'sveiser','lodding','lodde','skjæring','slipeskjæring','vinkelsliper','taktekking',
+      'tak','papp','membrantetting','bitumen','asfaltarbeider','isolering','isolasjon',
+      'pipe','ildsted','skorstein','kamin','oppvarming','fjernvarme','varmeanlegg',
+      // Mekaniker/verksted
+      'verksted','sveiseverksted','bilverksted','karosseri','metallarbeid','stålarbeid',
+      // Fiskeri/industri
+      'skipsbygging','skipsindustri','offshore sveising','fabrikasjon',
+      // Landbruk
+      'gårdsverksted','redskapsreparasjon','traktorverksted'],
+    nace_bonus:['43.91','43.99','43.22','43.29','25.11','25.62','45.20','33.15','30.11'],
+    base_nace:['41','42','43','25','33','45','30']
+  },
+  'Branntetting': {
+    icon:'🧯', kategori:'Varme & Brann',
+    keywords:['branntetting','brannmur','brannvegg','branncelle','brannklasse','brannkrav',
+      'gjennomføring','rørgjennomføring','kabelgjennomføring','brannspjeld',
+      'sprinkler','brannslukking','brannsikring','brannvern','branntiltak',
+      'EI-klassifisering','branntett','passiv brannsikring','brannhemmende',
+      // Skip/offshore
+      'brannsikring skip','maritim brannsikring'],
+    nace_bonus:['43.29','43.22','43.99','41.20','68.32','30.11'],
+    base_nace:['41','42','43','68','81','30']
+  },
+
+  // ── VVS / VÅTROM / VA ────────────────────────────────────────────────────────
+  'Våtromskurs': {
+    icon:'🚿', kategori:'VVS & Våtrom',
+    keywords:['våtrom','baderom','bad','dusjrom','wc','toalett','membran','fuktsperre',
+      'fukt','flislegging','flis','tetting','tettesjikt','rørlegger','rørlegging','vvs',
+      'sanitær','sluk','servant','klosett','badekar','BVN','byggebransjens våtromsnorm',
+      'rehabilitering av bad','renovering av bad','baderomsrenovering',
+      // Utleie/eiendom
+      'utleiebolig','leiegård','borettslag','sameie','boligforvaltning'],
+    nace_bonus:['43.22','43.29','41.20','68.20','68.32'],
+    base_nace:['41','43','68','81']
+  },
+  'ADK1': {
+    icon:'💧', kategori:'VVS & Våtrom',
+    keywords:['va-anlegg','vann og avløp','vannledning','avløpsledning','kloakk',
+      'spillvann','overvann','ledningsnett','stikkledning','vannverk',
+      'pumpestasjoner','trykkledning','selvfall','sanering','kommunalteknikk','rørgraving',
+      // Grunnarbeid og graving
+      'grunnarbeid','graving','grave','gravearbeid','grøft','grøfting','grøftearbeid',
+      'drenering','dreneringsarbeid','planering','tomtearbeid','massehåndtering',
+      'sprengning','fjellsprengning',
+      // Anlegg
+      'anlegg','anleggsarbeid','anleggsdrift','anleggsvirksomhet','anleggsentreprenør',
+      'veibygging','veiarbeid','betong','armering','forskaling','infrastruktur',
+      // Maskin
+      'maskin','maskinkjøring','maskinentreprenør','maskinfører','maskinoperatør',
+      'minigraver','minimaskin','hjullaster','gravemaskin','bulldozer','dumper',
+      // Landbruk/skogbruk: drenering er særlig relevant
+      'jordbruksdrenering','grøfting av mark','drenering av jord','landbruksdrenering'],
+    nace_bonus:['36.00','37.00','38.21','42.21','42.11','42.12','43.12','01.11','01.13'],
+    base_nace:['42','43','36','37','68','81','01']
+  },
+  'Grøftekurs': {
+    icon:'⛏️', kategori:'VVS & Våtrom',
+    keywords:['grøft','grøfting','grøftearbeid','grøftesikring','grøftekasse',
+      'graving','grave','rørgraving','ledningsgraving','sikringsplan',
+      'utglidning','ras','geoteknikk','massivstand','grunnvann',
+      'drensgrøft','kabelgrøft','jordgrøft','grøftemaskine',
+      // Landbruk
+      'landbruksgrøft','jordbruksgrøft','drenering jord','åkerdrenering'],
+    nace_bonus:['42.21','43.12','42.11','36.00','37.00','01.11','01.13'],
+    base_nace:['42','43','01']
+  },
+
+  // ── ELEKTRO ──────────────────────────────────────────────────────────────────
+  'FSE-kurs': {
+    icon:'⚡', kategori:'Elektro',
+    keywords:['elektrisk','elektro','elektroanlegg','høyspent','lavspent','FSE',
+      'elektriker','elinstallatør','strøm','spenning','vern','kortslutning','NEK',
+      'jordfeil','el-sikkerhet','transformator','aggregat','UPS','solcelle',
+      'ladestasjoner','tavle','kabel','kabling',
+      // Fiskeri/offshore
+      'skip elektro','båt elektro','maritim elektro','offshore elektro',
+      // Landbruk
+      'gårdsanlegg elektro','fjøs elektro','driftsbygning strøm','landbruk el',
+      // Utleie
+      'maskinutleie elektro','kranelektro'],
+    nace_bonus:['43.21','35.11','35.13','27.12','26.20','30.11','50.20'],
+    base_nace:['43.21','35','27','26','30','50','01','02']
+  },
+  'NEK 400': {
+    icon:'⚡', kategori:'Elektro',
+    keywords:['NEK 400','NEK400','elektrisk installasjonsarbeid','elinstallasjon',
+      'elektrikerarbeid','installasjonsnorm','el-norm','spenningssetting',
+      'sikringsskap','kursopplegg','jordfeil','RCD','vern','automat',
+      // Landbruk spesifikt
+      'NEK 400 landbruk','gårdsinstallasjon','fjøsanlegg','veksthus elektro'],
+    nace_bonus:['43.21','35.11','27.12','01.11','01.30'],
+    base_nace:['43.21','35','01']
+  },
+  'Ex-kurs': {
+    icon:'💥', kategori:'Elektro',
+    keywords:['ex-område','eksplosiv','eksplosjonsfarlig','atex','ex-klassifisering',
+      'sone 0','sone 1','sone 2','gassanlegg','gassfylt','brennbar gass',
+      'brennbar væske','støveksplosjon','raffineri','offshore','tank','silo',
+      'prosessanlegg','kjemisk industri','ex-utstyr','ex-sertifisert',
+      // Fiskeri/havbruk
+      'fiskefartøy ex','båt ex','ex offshore'],
+    nace_bonus:['06.10','09.10','20.11','19.20','35.21','50.10'],
+    base_nace:['06','09','20','19','35','50']
+  },
+
+  // ── HMS ───────────────────────────────────────────────────────────────────────
+  'HMS-kurs ledere': {
+    icon:'📋', kategori:'HMS',
+    keywords:['systematisk HMS','HMS-ansvarlig','HMS-håndbok','internkontroll','arbeidsmiljøloven','helse miljø sikkerhet',
+      'arbeidsgiver','personalansvar','verneombud','arbeidstilsyn','risikovurdering',
+      'systematisk HMS','HMS-håndbok','ansatte','bedriftsledelse','daglig leder',
+      // Alle bransjer — generisk, bred dekning
+      'gårdsdrift','fiskebåt','skipsreder','skogeier','maskinpark','utleiefirma'],
+    nace_bonus:[],
+    base_nace:['41','42','43','81','25','28','35','49','86','55','01','02','03','45','77']
+  },
+  'HMS-kurs ansatte': {
+    icon:'📋', kategori:'HMS',
+    keywords:['HMS-opplæring','sikkerhetsopplæring','arbeidsmiljø','verneutstyr','arbeidssikkerhet',
+      'ulykke','nestenulykke','faremelding','avviksmeld','sikkerhetsinstruks',
+      'vernerunde','risikovurdering','arbeidstaker'],
+    nace_bonus:[],
+    base_nace:['41','42','43','81','25','28','35','01','02','03']
+  },
+  'HMS-kurs Bygg': {
+    icon:'🏠', kategori:'HMS',
+    keywords:['byggearbeid','byggeplass','byggeprosjekt','SHA-plan','byggherre','koordinator',
+      'byggeprosjekt','anbudsprosjekt','entreprise','totalentreprise','generalentreprise',
+      'byggesak','byggetillatelse','bygningsmasse'],
+    nace_bonus:['41.10','41.20','42.11','43.99'],
+    base_nace:['41','42','43']
+  },
+  'Verneombudskurs': {
+    icon:'🦺', kategori:'HMS',
+    keywords:['verneombud','vernetjeneste','arbeidsmiljøutvalg','AMU',
+      'tillitsvalgt','fagforening','arbeidstakerrepresentant','verneopplæring',
+      'verneombudsopplæring','sikkerhetsrepresentant'],
+    nace_bonus:[],
+    base_nace:['41','42','43','25','28','81','35','49','01','02','03']
+  },
+
+  // ── MASKIN & LØFT ─────────────────────────────────────────────────────────────
+  'Anhukerkurs': {
+    icon:'🪝', kategori:'Løft & Kran',
+    keywords:['anhuker','stroppe','sling','løfteoperasjon','løfteutstyr','løfteredskap','kran','krankjøring','kranfører',
+      'signalgiver','løfteutstyr','traverskran','mobilkran','tårnkran','løfteoperasjon',
+      'sjakkel','wire','kjetting','løfteplate','vakuumløfter','lastebilkran','løftesele',
+      // Skogbruk
+      'tømmerkran','skogskran','tømmerhåndtering','hogstmaskin kran',
+      // Fiskeri
+      'fiskekran','dekkskran','løft på båt','havnekran',
+      // Mekaniker/industri
+      'verkstedkran','traverskran verksted','motorkran'],
+    nace_bonus:['43.99','42.21','42.11','28.22','33.12','52.24','02.20','03.11','50.20'],
+    base_nace:['41','42','43','28','33','52','02','03','50']
+  },
+  'Farlig småverktøy': {
+    icon:'🔧', kategori:'Maskin & Verktøy',
+    keywords:['vinkelsliper','skjæreverktøy','sirkelsag','stikksag','motorsag','kjedesag',
+      'høvelmask','fres','bor','drill','spikerpistol','naglepistol','trykkluft',
+      'løvblåser','hekktrimmer','strimler','småverktøy','håndverktøy farlig',
+      // Skogbruk — spesielt motorsag
+      'motorsag skog','skogsarbeid','hogst','tynning','ryddesag','ryddingsag',
+      'skogsmaskin','skogsdrift','tømmerhogst',
+      // Jordbruk/landbruk
+      'jordbruksmaskin','landbruksmaskin','traktor tilbehør','slåmaskin',
+      // Mekaniker
+      'bilverksted verktøy','reparasjonsverktøy','mekaniker verktøy'],
+    nace_bonus:['43.99','43.29','16.10','81.30','43.12','02.10','02.20','01.61'],
+    base_nace:['41','42','43','16','81','02','01']
+  },
+
+  // ── KJEMISK / SPESIAL ─────────────────────────────────────────────────────────
+  'Kjemikaliekurs': {
+    icon:'🧪', kategori:'Kjemisk & Spesial',
+    keywords:['kjemikalie','kjemisk','farlig stoff','CMR','SDS','sikkerhetsdatablad',
+      'løsemiddel','syrer','baser','isocyanat','maling','lim','lakk',
+      'rengjøringsmiddel','desinfeksjon','biocid','pesticid','sprøytemiddel',
+      // Jordbruk/landbruk
+      'plantevernmiddel','sprøyting','herbicid','fungicid','insekticid',
+      'gjødsel','kunstgjødsel','husdyrgjødsel','ammoniakk','silo gass',
+      'ensilering','gjødselkum','gjødselgass',
+      // Fiskeri/havbruk
+      'lakselus behandling','avlusning','kjemikalier fisk','desinfeksjon oppdrett',
+      // Mekaniker
+      'olje','smøremiddel','hydraulikkolje','motorolje','kjølevæske','bremsevæske',
+      'løsemiddel bilpleie','lakkering'],
+    nace_bonus:['20.11','20.30','20.41','22.11','43.34','81.22','01.11','01.41','03.21'],
+    base_nace:['20','22','43','81','01','03']
+  },
+  'Diisocyanater': {
+    icon:'🧪', kategori:'Kjemisk & Spesial',
+    keywords:['diisocyanat','isocyanat','PU-skum','polyuretan','MDI','TDI','HDI',
+      'lakk','coating','lim','tetningsmiddel','isolasjonsskum','sprøytet isolasjon',
+      // Bil/mekaniker
+      'karosserilakk','autolakk','billakkering'],
+    nace_bonus:['43.34','43.29','20.30','22.29','45.20'],
+    base_nace:['43','20','22','45']
+  },
+  'Asbestkurs': {
+    icon:'⚠️', kategori:'Kjemisk & Spesial',
+    keywords:['asbest','asbestos','asbestholdig','eternitt','asbestsanering','riving',
+      'rehabilitering','ombygging','gamle bygg','eternittplater',
+      'asbestfiber','kartlegging','prøvetaking','asbest i bygg',
+      // Skip/sjøfart
+      'asbest i skip','maritime asbest','båt rehabilitering'],
+    nace_bonus:['43.11','41.20','81.22','71.12','50.20'],
+    base_nace:['41','43','81','50']
+  },
+  'Smittevernkurs': {
+    icon:'😷', kategori:'Kjemisk & Spesial',
+    keywords:['smittevern','smitte','infeksjon','hygiene','renhold','desinfeksjon',
+      'helsepersonell','pleie','omsorg','sykehjem','sykehus','hjemmetjeneste',
+      'barnehage','skole','renholder','sterilisering','isolat',
+      // Havbruk/fiskeri
+      'fiskehelse','sykdom fisk','smittevern oppdrett','hygiene fiskemottak',
+      // Næringsmidler
+      'matproduksjon hygiene','næringsmiddelhygiene','HACCP','matvaresikkerhet'],
+    nace_bonus:['86.10','86.21','86.90','87.10','88.10','81.21','81.22','03.21','10.20'],
+    base_nace:['86','87','88','81','03','10']
+  },
+
+  // ── ARBEIDSVARSLING & VINTER ──────────────────────────────────────────────────
+  'Arbeidsvarsling': {
+    icon:'🦺', kategori:'Vei & Vinter',
+    keywords:[
+      // Kjerneaktiviteter som alltid krever arbeidsvarsling
+      'brøyting','snøbrøyting','vintervedlikehold','salting','sandstrøing',
+      'graving','gravearbeid','veiarbeid','veivedlikehold','asfaltering',
+      'grøfting','ledningsarbeid','kabeltrekking','rørlegging i vei',
+      // Utendørs drift langs vei
+      'utendørs vedlikehold','park og vei','gaterenhold','fortausrenhold',
+      'vegvedlikehold','kommunalteknisk','veidrift','anleggsarbeid',
+      'trafikkregulering','veisikring',
+      // Eksplisitte arbeidsvarsling-termer
+      'arbeidsvarsling','varsling langs vei','trafikkvarsling','veiskilting'],
+    nace_bonus:['42.11','42.12','81.29','81.30','38.11','02.10','01.61'],
+    base_nace:['42','81','02','01']
+  },
+  'Vinterdrift': {
+    icon:'❄️', kategori:'Vei & Vinter',
+    keywords:['vinterdrift','brøyting','brøyte','brøyter','snøbrøyting','snørydding',
+      'snøfresing','sandstrøing','salting','vintervedlikehold','vinterberedskap',
+      'vinterservice','isbekjempelse','glattføre','plogkjøring','snøplog','plog',
+      'veisalt','snøhåndtering','strøsand','veidrift vinter',
+      // Utleie av maskiner til brøyting
+      'maskinutleie vinter','brøyteutstyr utleie',
+      // Landbruk: vinter på gård
+      'vinterdrift gård','snørydding gård'],
+    nace_bonus:['42.11','81.29','81.30','52.21','77.32','01.61'],
+    base_nace:['42','81','77','01']
+  },
+
+  // ── HELSE ─────────────────────────────────────────────────────────────────────
+  'Førstehjelpskurs': {
+    icon:'🩺', kategori:'Helse & Redning',
+    keywords:['førstehjelp','HLR','hjerte-lunge-redning','hjertestarter','AED',
+      'sår','blødning','brannskade','forgiftning','bevisstløs','sjokk',
+      'DRSABC','akuttmedisin','nødsituasjon','redning',
+      // Fiskeri — spesielt relevant pga. isolerte arbeidsforhold
+      'fiskefartøy sikkerhet','mann over bord','MOB','overlevelsesdrakt',
+      // Skogbruk — isolert arbeid
+      'skogsarbeid alene','varsling skog','nødprosedyre skogsdrift',
+      // Jordbruk
+      'traktorulykke','maskinstans nødhjelp'],
+    nace_bonus:['03.11','03.12','02.10','02.20','01.11','01.41','50.10'],
+    base_nace:['41','42','43','25','28','49','86','81','01','02','03','50']
+  },
+
+  // ── ANNET ─────────────────────────────────────────────────────────────────────
+  'Norskkurs byggebransjen': {
+    icon:'🇳🇴', kategori:'Annet',
+    keywords:['polsk','litauisk','utenlandsk arbeidskraft','arbeidsinnvandrer',
+      'flerspråklig','tolk','norsk opplæring','språkopplæring',
+      'utenlandsk','utenlandske ansatte','østeuropeisk','arbeider fra utlandet'],
+    nace_bonus:['41.20','43.99','42.11','43.12','03.11'],
+    base_nace:['41','42','43','03']
+  },
+  'ChatGPT i HMS': {
+    icon:'🤖', kategori:'Annet',
+    keywords:['ChatGPT','kunstig intelligens i HMS','AI i arbeidsmiljø','digitalisering HMS','effektivisering HMS'],
+    nace_bonus:[],
+    base_nace:['41','42','43','71','72']
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════════════════════════════════════════════
+const API = 'https://data.brreg.no/enhetsregisteret/api/enheter';
+let results = [], sortCol = 'score', sortDir = 'desc', curPage = 1;
+const PER = 20;
+
+// ── Bygg kursliste i sidebar ─────────────────────────────────────────────────
+function byggKursList() {
+  const kategorier = {};
+  for (const [navn, def] of Object.entries(KURS_DEF)) {
+    if (!kategorier[def.kategori]) kategorier[def.kategori] = [];
+    kategorier[def.kategori].push({ navn, ...def });
+  }
+  let html = '';
+  for (const [kat, kurs] of Object.entries(kategorier)) {
+    html += `<div style="font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:.85rem 0 .35rem;padding-bottom:.2rem;border-bottom:1px solid var(--border)">${kat}</div>`;
+    for (const k of kurs) {
+      html += `<div class="kurs-item on" data-kurs="${k.navn}" onclick="toggleKurs(this)">
+        <span class="ki">${k.icon}</span>
+        <div><div class="kn">${k.navn}</div></div>
+        <button class="kurs-info-btn" onclick="visInfo(event, k.navn)"\'")}')" title="Vis nøkkelord">i</button>
+        <div class="kurs-check">✓</div>
+      </div>`;
+    }
+  }
+  document.getElementById('kursList').innerHTML = html;
+}
+byggKursList();
+
+function visInfo(e, kursNavn) {
+  e.stopPropagation();
+  const def = KURS_DEF[kursNavn];
+  if (!def) return;
+  const tt = document.getElementById('kurs-tooltip');
+  const title = document.getElementById('tt-title');
+  const kwDiv = document.getElementById('tt-kw');
+  // Toggle off if same
+  if (tt.classList.contains('show') && title.textContent === def.icon + ' ' + kursNavn) {
+    tt.classList.remove('show'); return;
+  }
+  title.textContent = def.icon + ' ' + kursNavn;
+  kwDiv.innerHTML = def.keywords.map(kw => `<span>${kw}</span>`).join('');
+  // Position near button
+  const rect = e.target.getBoundingClientRect();
+  const ttW = 280;
+  let left = rect.right + 8;
+  if (left + ttW > window.innerWidth) left = rect.left - ttW - 8;
+  tt.style.left = left + 'px';
+  tt.style.top = Math.min(rect.top, window.innerHeight - 300) + 'px';
+  tt.classList.add('show');
+}
+document.addEventListener('click', () => {
+  document.getElementById('kurs-tooltip').classList.remove('show');
+});
+
+function showKursTooltip(e, kursNavn, el) {
+  const def = KURS_DEF[kursNavn];
+  if (!def) return;
+  const tt = document.getElementById('kurs-tooltip');
+  document.getElementById('tt-title').textContent = kursNavn;
+  document.getElementById('tt-kw').innerHTML = (def.keywords || []).map(kw => `<span>${kw}</span>`).join('');
+  const rect = el.getBoundingClientRect();
+  const ttW = 280;
+  let left = rect.right + 10;
+  if (left + ttW > window.innerWidth) left = rect.left - ttW - 10;
+  let top = rect.top;
+  if (top + 200 > window.innerHeight) top = window.innerHeight - 220;
+  tt.style.left = left + 'px';
+  tt.style.top = Math.max(8, top) + 'px';
+  tt.classList.add('show');
+}
+
+function hideKursTooltip() {
+  document.getElementById('kurs-tooltip').classList.remove('show');
+}
+
+function toggleKurs(el) { el.classList.toggle('on'); el.querySelector('.kurs-check').textContent = el.classList.contains('on') ? '✓' : ''; }
+function selectAll()  { document.querySelectorAll('.kurs-item').forEach(el => { el.classList.add('on');    el.querySelector('.kurs-check').textContent = '✓'; }); }
+function selectNone() { document.querySelectorAll('.kurs-item').forEach(el => { el.classList.remove('on'); el.querySelector('.kurs-check').textContent = ''; }); }
+function getKurs()    { return [...document.querySelectorAll('.kurs-item.on')].map(el => el.dataset.kurs); }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function setStatus(msg, s='') { document.getElementById('statusMsg').textContent = msg; document.getElementById('statusDot').className = 'dot'+(s?' '+s:''); }
+function setProgress(p) { document.getElementById('prog').style.width = p+'%'; }
+function toast(msg, err=false) { const t=document.getElementById('toast'); t.textContent=msg; t.className='show'+(err?' err':''); setTimeout(()=>t.className='',3500); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function fmtD(d) { if(!d)return'—'; try{return new Date(d).toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;} }
+function isNy(d) { return d && new Date(d) >= new Date(Date.now()-90*864e5); }
+function setDato(n) { const t=new Date(),f=new Date(); f.setDate(f.getDate()-n); document.getElementById('datoFra').value=f.toISOString().split('T')[0]; document.getElementById('datoTil').value=t.toISOString().split('T')[0]; }
+function clearDato() { document.getElementById('datoFra').value=''; document.getElementById('datoTil').value=''; }
+function setPhase(n,s) { document.getElementById('ph'+n).className='phase'+(s==='active'?' active':s==='done'?' done':''); }
+function setPhaseCount(n,txt,ok=false) { const el=document.getElementById('ph'+n+'c'); el.textContent=txt; el.className='phase-count'+(ok?' ok':''); }
+
+// ── SCORING ───────────────────────────────────────────────────────────────────
+function scoreEnhet(enhet, valgteKurs) {
+  const aktivitetTekst = (enhet.aktivitet || '').toLowerCase();
+  const suppTekst      = (enhet.navn + ' ' + enhet.nace_label).toLowerCase();
+  const nace           = (enhet.nace_kode || '').replace('.', '');
+  const treff = [];
+
+  // Score beregnes PER KURS — ikke normalisert mot antall valgte kurs.
+  // Logikk: hvert nøkkelordtreff i aktivitetsfelt er en direkte indikasjon på kursbehov.
+  // 1 treff = allerede sterk signal. Flere treff = enda høyere sikkerhet.
+  //
+  // Skala per kurs:
+  //   1 treff  → ~60p  (tydelig kursbehov)
+  //   2 treff  → ~80p
+  //   3+ treff → 90–100p
+  //   NACE-match i tillegg → +5–8p bonus (runder opp mot 100)
+
+  for (const kursNavn of valgteKurs) {
+    const def = KURS_DEF[kursNavn];
+    if (!def) continue;
+
+    const matchedKw = [];
+
+    // Primær: aktivitetsfelt (brukerskrevet tekst — sterkeste signal)
+    for (const kw of def.keywords) {
+      // Enkeltord: krev ordgrense () så "anlegg" ikke treffer "kuldeanlegg"
+      // Fraser med mellomrom/bindestrek: eksakt substring er OK
+      const harMellomrom = kw.includes(' ') || kw.includes('-');
+      if (harMellomrom) {
+        if (aktivitetTekst.includes(kw)) matchedKw.push(kw);
+      } else {
+        // Ordgrense: enkeltord må stå alene, fraser med mellomrom/bindestrek: eksakt match
+        try {
+          const esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const re = new RegExp('(?<![\\wæøåÆØÅ])' + esc + '(?![\\wæøåÆØÅ])', 'i');
+          if (re.test(aktivitetTekst)) matchedKw.push(kw);
+        } catch(e) {
+          if (aktivitetTekst.includes(kw)) matchedKw.push(kw);
+        }
+      }
+    }
+
+    // Sjekk også firmanavn (svakere signal enn aktivitetstekst)
+    const navnMatchedKw = [];
+    if (matchedKw.length === 0) {
+      const navnTekst = (enhet.navn || '').toLowerCase();
+      for (const kw of def.keywords) {
+        const harMellomrom = kw.includes(' ') || kw.includes('-');
+        if (harMellomrom) {
+          if (navnTekst.includes(kw)) navnMatchedKw.push(kw);
+        } else {
+          try {
+            const esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp('(?<![\\wæøåÆØÅ])' + esc + '(?![\\wæøåÆØÅ])', 'i');
+            if (re.test(navnTekst)) navnMatchedKw.push(kw);
+          } catch(e) {
+            if ((enhet.navn||'').toLowerCase().includes(kw)) navnMatchedKw.push(kw);
+          }
+        }
+      }
+    }
+
+    // Ingen treff verken i aktivitetsfelt eller navn → ikke kvalifisert
+    const fraAktivitet = matchedKw.length > 0;
+    const fraNavn      = navnMatchedKw.length > 0;
+    if (!fraAktivitet && !fraNavn) continue;
+
+    // Score — aktivitetsfelt gir full score, firmanavn gir redusert score (maks 45p)
+    let kScore, kilde;
+    if (fraAktivitet) {
+      const n = matchedKw.length;
+      kScore = Math.round(100 - (40 / n));
+      kScore = Math.min(kScore, 98);
+      kilde = 'aktivitet';
+      // NACE-bonus kun for aktivitetstreff
+      if (def.base_nace.some(b => nace.startsWith(b.replace('.',''))))  kScore = Math.min(100, kScore + 3);
+      if (def.nace_bonus.some(b => nace.startsWith(b.replace('.',''))))  kScore = Math.min(100, kScore + 5);
+    } else {
+      // Navn-treff: lavere score, fast skala
+      // 1 treff i navn = 25p, 2 = 35p, 3+ = 45p
+      kScore = Math.min(45, 15 + navnMatchedKw.length * 10);
+      kilde = 'navn';
+      // NACE-bonus hever navn-score litt — sterk bransjesignal
+      if (def.nace_bonus.some(b => nace.startsWith(b.replace('.',''))))  kScore = Math.min(55, kScore + 10);
+      matchedKw.push(...navnMatchedKw);
+    }
+
+    const prioritet = kScore >= 80 ? 'high' : kScore >= 60 ? 'med' : 'low';
+    treff.push({ kurs: kursNavn, score: kScore, prioritet, matchedKw, kilde });
+  }
+
+  // Totalscore = høyeste enkelt-kurs-score (ikke gjennomsnitt — én sterk match er nok)
+  const score = treff.length > 0 ? Math.max(...treff.map(t => t.score)) : 0;
+  return { treff, score };
+}
+
+function highlightText(tekst, valgteKurs) {
+  if (!tekst) return '';
+  let r = tekst.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const kw = [...new Set(valgteKurs.flatMap(k => KURS_DEF[k]?.keywords||[]))].sort((a,b)=>b.length-a.length);
+  for (const w of kw) {
+    const re = new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    r = r.replace(re,'<span class="hl">$1</span>');
+  }
+  return r;
+}
+
+// ── FASE 1: Hent fra Brønnøysund ─────────────────────────────────────────────
+async function fase1() {
+  const naceValg = document.getElementById('selNace').value;
+  const fylke    = document.getElementById('selFylke').value;
+  const maxRaw   = parseInt(document.getElementById('selMax').value);
+  const max      = maxRaw >= 9999 ? 99999 : maxRaw;
+  const datoFra  = document.getElementById('datoFra').value;
+  const datoTil  = document.getElementById('datoTil').value;
+  const orgform   = document.getElementById('selOrgform').value;
+  const naceListe = naceValg === 'alle'
+    ? ['41','42','43','43.2',
+       '68.2','68.3','81.1','81.2','81.3',
+       '10','16','20','22','23','24','25','26','27','28','29','30','33',
+       '35','36','37','38',
+       '49','50','52',
+       '06','08','09',
+       '01','02','03',
+       '45.2','77','78',
+       '30.1','71','85','86','87','88']
+    : [naceValg];
+
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('btn1').textContent = 'Henter…';
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('btn3').disabled = true;
+  setPhase(1,'active'); setPhase(2,''); setPhase(3,'');
+  results = []; setProgress(0); renderTable();
+
+  const SIZE    = 100;
+  const API_MAX = 9500; // Brønnøysund har hard grense: page*size ≤ 10 000
+  // Kommunenummer-prefikser per fylke — brukes til auto-splitting over API-grensen
+  // Splitting: én spørring per fylke, med alle kommunenummer kommaseparert
+  // Kilde: Kartverket kommuneinndeling 2024
+  const ALLE_FYLKER = [
+    // Oslo
+    '0301',
+    // Akershus
+    '3201,3203,3205,3207,3209,3211,3212,3213,3214,3215,3216,3217,3218,3219,3220,3221,3222,3223,3224,3225,3226,3227,3228,3229,3230,3231,3232,3233,3234,3235,3236,3237,3238,3239,3240,3241,3242,3243',
+    // Innlandet
+    '3403,3405,3407,3411,3412,3413,3414,3415,3416,3417,3418,3419,3420,3421,3422,3423,3424,3425,3426,3427,3428,3429,3430,3431,3432,3433,3434,3435,3436,3437,3438,3439,3440,3441,3442,3443,3444,3445,3446,3447,3448,3449,3450,3451,3452,3453,3454',
+    // Vestfold og Telemark
+    '3801,3802,3803,3804,3805,3806,3807,3808,3809,3810,3811,3812,3813,3814,3815,3816,3817,3818,3819,3820,3821,3822,3823,3824,3825',
+    // Agder
+    '4201,4202,4203,4204,4205,4206,4207,4208,4209,4210,4211,4212,4213,4214,4215,4216,4217,4218,4219,4220,4221,4222,4223,4224,4225,4226',
+    // Rogaland
+    '1101,1103,1106,1108,1111,1112,1114,1119,1120,1121,1122,1124,1127,1130,1133,1134,1135,1144,1145,1146,1149,1151,1160',
+    // Vestland
+    '4601,4602,4611,4612,4613,4614,4615,4616,4617,4618,4619,4620,4621,4622,4623,4624,4625,4626,4627,4628,4629,4630,4631,4632,4633,4634,4635,4636,4637,4638,4639,4640,4641,4642,4643,4644,4645,4646,4647,4648,4649,4650,4651',
+    // Møre og Romsdal
+    '1506,1507,1511,1514,1515,1516,1517,1520,1523,1524,1525,1528,1531,1532,1535,1539,1547,1554,1557,1560,1563,1566,1573,1576,1577,1578,1579',
+    // Trøndelag
+    '5001,5006,5007,5014,5020,5021,5022,5025,5026,5027,5028,5029,5031,5032,5033,5034,5035,5036,5037,5038,5041,5042,5043,5044,5045,5046,5047,5049,5052,5053,5054,5055,5056,5057,5058,5059,5060,5061',
+    // Nordland
+    '1804,1806,1811,1812,1813,1815,1816,1818,1820,1822,1824,1825,1826,1827,1828,1832,1833,1834,1835,1836,1837,1838,1839,1840,1841,1845,1848,1851,1853,1856,1857,1859,1860,1865,1866,1867,1868,1870,1871,1874,1875',
+    // Troms
+    '5401,5402,5403,5404,5405,5406,5411,5412,5413,5414,5415,5416,5417,5418,5419,5420,5421,5422,5423,5424,5425,5426,5427,5428,5429,5430',
+    // Finnmark
+    '5432,5433,5434,5435,5436,5437,5438,5439,5440,5441,5442,5443,5444',
+  ];
+  let alle = [];
+
+  try {
+    for (const nace of naceListe) {
+      if (alle.length >= max) break;
+
+      // Felles parametere for denne NACE-koden
+      let base = `naeringskode=${nace}&konkurs=false&underAvvikling=false`;
+      if (datoFra)  base += `&fraRegistreringsdatoEnhetsregisteret=${datoFra}`;
+      if (datoTil)  base += `&tilRegistreringsdatoEnhetsregisteret=${datoTil}`;
+      if (orgform)  base += `&organisasjonsform=${orgform}`;
+
+      // Sjekk totalt antall treff
+      const chkResp = await fetch(`${API}?${base}&size=1&page=0${fylke?'&kommunenummer='+fylke:''}`);
+      if (!chkResp.ok) throw new Error(`Brønnøysund HTTP ${chkResp.status} — sjekk nettverkstilgang`);
+      const totalTreff = (await chkResp.json()).page?.totalElements || 0;
+      if (totalTreff === 0) continue;
+
+      // Bestem hvilke kommunenummer-filtre vi skal bruke
+      const filtre = (fylke)
+        ? [fylke]                          // Bruker har valgt fylke — én spørring
+        : (totalTreff <= API_MAX)
+          ? ['']                           // Under grensen — ingen filter nødvendig
+          : ALLE_FYLKER;                   // Over grensen — split på alle fylker
+
+      for (const knr of filtre) {
+        if (alle.length >= max) break;
+        const params = base + (knr ? `&kommunenummer=${knr}` : '');
+
+        // Hent side 0
+        const r0 = await fetch(`${API}?${params}&size=${SIZE}&page=0`);
+        if (!r0.ok) continue;
+        const d0 = await r0.json();
+        const totalElem  = d0.page?.totalElements || 0;
+        const totalPages = Math.min(d0.page?.totalPages || 1, Math.ceil(API_MAX / SIZE));
+        const label = `NACE ${nace}${knr?' / '+knr:''}`;
+        setStatus(`${label}: ${totalElem.toLocaleString('no')} enheter…`, 'run');
+        alle.push(...(d0._embedded?.enheter || []));
+
+        // Hent resterende sider
+        for (let pg = 1; pg < totalPages && alle.length < max; pg++) {
+          await sleep(120);
+          try {
+            const rN = await fetch(`${API}?${params}&size=${SIZE}&page=${pg}`);
+            if (rN.ok) alle.push(...((await rN.json())._embedded?.enheter || []));
+          } catch { await sleep(600); }
+          setProgress(Math.round((alle.length / Math.max(max, 1)) * 80));
+          setPhaseCount(1, alle.length + ' hentet');
+        }
+      }
+    }
+
+    const sett = new Set();
+    alle = alle.filter(e => { if(sett.has(e.organisasjonsnummer))return false; sett.add(e.organisasjonsnummer); return true; });
+    if (max < 99999) alle = alle.slice(0, max);
+    if (!alle.length) throw new Error('Ingen bedrifter funnet. Prøv bredere søkekriterier.');
+
+    results = alle.map(e => {
+      const adr = e.forretningsadresse || e.postadresse || {};
+      const akt = Array.isArray(e.aktivitet) ? e.aktivitet.join(', ') : (e.aktivitet||'');
+      const fml = Array.isArray(e.formaal)   ? e.formaal.join(', ')   : (e.formaal||'');
+      return {
+        navn: e.navn||'', orgnr: e.organisasjonsnummer||'',
+        nace_kode: e.naeringskode1?.kode||'', nace_label: e.naeringskode1?.beskrivelse||'',
+        sted: adr.poststed||'', kommune: adr.kommune||'',
+        ansatte: e.antallAnsatte||0, opprettet: e.registreringsdatoEnhetsregisteret||e.stiftelsesdato||'',
+        aktivitet: akt||fml, harAktivitet: !!(akt||fml),
+        hjemmeside: e.hjemmeside||'', orgform: e.organisasjonsform?.beskrivelse||'',
+        score: 0, kurs_treff: [],
+      };
+    });
+
+    setProgress(100); setPhase(1,'done');
+    setPhaseCount(1, results.length+' bedrifter', true);
+    setStatus(`Fase 1 ferdig — ${results.length} bedrifter hentet.`, 'ok');
+    document.getElementById('btn2').disabled = false;
+    document.getElementById('exportRow').style.display = 'flex';
+    sortCol='navn'; sortDir='asc'; curPage=1;
+    renderTable(); renderPag();
+    toast(`✓ ${results.length} bedrifter hentet`);
+
+  } catch(err) {
+    setStatus('Feil: '+err.message, 'err'); toast(err.message, true); console.error(err); setPhase(1,'');
+  } finally {
+    document.getElementById('btn1').disabled = false;
+    document.getElementById('btn1').textContent = '↺ Skann på nytt';
+  }
+}
+
+// ── FASE 2: Hent aktivitetsfelt ───────────────────────────────────────────────
+async function fase2() {
+  if (!results.length) { toast('Kjør Fase 1 først', true); return; }
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('btn2').textContent = 'Leser…';
+  setPhase(2,'active'); setProgress(0);
+  setStatus(`Henter aktivitetsfelt…`, 'run');
+
+  for (let i = 0; i < results.length; i++) {
+    if (!results[i].harAktivitet) {
+      try {
+        await sleep(80);
+        const resp = await fetch(`${API}/${results[i].orgnr}`);
+        if (resp.ok) {
+          const d = await resp.json();
+          const akt = Array.isArray(d.aktivitet) ? d.aktivitet.join(', ') : (d.aktivitet||'');
+          const fml = Array.isArray(d.formaal)   ? d.formaal.join(', ')   : (d.formaal||'');
+          results[i].aktivitet = akt||fml; results[i].harAktivitet = true;
+        }
+      } catch { }
+    }
+    if (i % 15 === 0) {
+      setProgress(Math.round((i/results.length)*100));
+      setStatus(`Leser aktivitetsfelt… ${i+1}/${results.length}`, 'run');
+      setPhaseCount(2, `${i+1}/${results.length}`);
+    }
+  }
+
+  const medAkt = results.filter(r=>r.aktivitet).length;
+  setProgress(100); setPhase(2,'done');
+  setPhaseCount(2, `${medAkt} med tekst`, true);
+  setStatus(`Fase 2 ferdig — ${medAkt} av ${results.length} har aktivitetsbeskrivelse.`, 'ok');
+  document.getElementById('btn3').disabled = false;
+  document.getElementById('btn2').disabled = false;
+  document.getElementById('btn2').textContent = '↺ Les på nytt';
+  renderTable(); renderPag();
+  toast('✓ Aktivitetsfelt lest');
+}
+
+// ── FASE 3: Score ─────────────────────────────────────────────────────────────
+async function fase3() {
+  const kurs = getKurs();
+  if (!kurs.length) { toast('Velg minst ett kurs!', true); return; }
+  if (!results.length) { toast('Kjør Fase 1 først', true); return; }
+
+  document.getElementById('btn3').disabled = true;
+  document.getElementById('btn3').textContent = 'Scorer…';
+  setPhase(3,'active'); setProgress(0);
+  setStatus('Scorer mot nøkkelord…', 'run');
+
+  for (let i = 0; i < results.length; i++) {
+    const { treff, score } = scoreEnhet(results[i], kurs);
+    results[i].score = score; results[i].kurs_treff = treff;
+    if (i % 50 === 0) setProgress(Math.round((i/results.length)*100));
+  }
+
+  const totalt = results.length;
+  results = results.filter(r => r.kurs_treff && r.kurs_treff.length > 0);
+  setProgress(100);
+  sortCol='score'; sortDir='desc'; curPage=1;
+  renderTable(); renderPag();
+
+  const høy = results.filter(r=>r.score>=40).length;
+  setPhase(3,'done'); setPhaseCount(3, `${results.length} leads`, true);
+  setStatus(`Fase 3 ferdig — ${results.length} leads av ${totalt} skannet. ${høy} høy prioritet.`, 'ok');
+  document.getElementById('btn3').disabled = false;
+  document.getElementById('btn3').textContent = '↺ Score på nytt';
+  toast(`✓ ${results.length} leads klar — kjør Fase 4 for AI-validering`);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const kurs = getKurs();
+  const sorted = [...results].filter(r=>r.kurs_treff&&r.kurs_treff.length>0).sort((a,b)=>{
+    const av=a[sortCol],bv=b[sortCol];
+    if(av==null&&bv==null)return 0; if(av==null)return 1; if(bv==null)return -1;
+    return sortDir==='asc'?(av>bv?1:-1):(av<bv?1:-1);
+  });
+  const pg = sorted.slice((curPage-1)*PER, curPage*PER);
+  if (!pg.length) {
+    document.getElementById('tbody').innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="icon"></div><p>Ingen resultater ennå. Start Fase 1.</p></div></td></tr>';
+    return;
+  }
+  document.getElementById('tbody').innerHTML = pg.map(r => {
+    const sc = r.score||0;
+    const bc = sc>=40?'var(--success)':sc>=15?'var(--warn)':'var(--muted)';
+    const ny = isNy(r.opprettet);
+    const kursHtml = r.kurs_treff?.length
+      ? r.kurs_treff.map(k=>`<span class="km ${k.prioritet}">${k.kurs}</span>`).join('')
+      : '–';
+    return `<tr>
+      <td>
+        <div class="cn">${r.navn}</div>
+        <div class="on">${r.orgnr}${r.sted?' · '+r.sted:''}${r.orgform?' · '+r.orgform:''}</div>
+        ${r.hjemmeside?`<div style="font-size:.68rem;margin-top:.2rem"><a href="${r.hjemmeside.startsWith('http')?r.hjemmeside:'https://'+r.hjemmeside}" target="_blank" style="color:var(--accent2);text-decoration:none">${r.hjemmeside}</a></div>`:''}
+      </td>
+      <td><span class="nb">${r.nace_kode}</span><div style="font-size:.68rem;color:var(--muted);margin-top:.2rem;max-width:130px;line-height:1.3">${r.nace_label}</div></td>
+      <td style="max-width:220px">${r.aktivitet
+        ?`<div class="at">«${highlightText(r.aktivitet.slice(0,150),kurs)}${r.aktivitet.length>150?'…':''}»</div>`
+        :(r.kurs_treff?.some(t=>t.kilde==='navn')
+          ?'<span style="font-size:.7rem;color:var(--warn)">⚠ Ingen aktivitetstekst — treff i firmanavn</span>'
+          :'<span style="font-size:.7rem;color:var(--border)">–</span>')
+      }</td>
+      <td>${kursHtml}</td>
+      <td><div class="sb"><div class="sb-t"><div class="sb-f" style="width:${sc}%;background:${bc}"></div></div><span class="sn" style="color:${bc}">${sc}</span></div></td>
+      <td><span class="emp">${r.ansatte||0}</span></td>
+      <td><span style="font-family:var(--mono);font-size:.69rem;color:${ny?'var(--success)':'var(--muted)'}">${fmtD(r.opprettet)}</span>${ny?'<div style="font-size:.61rem;color:var(--success);margin-top:2px">● Ny</div>':''}</td>
+      <td>
+        <select onchange="quickTildel(event,'${r.orgnr}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--mono);font-size:.67rem;padding:.2rem .4rem;cursor:pointer;outline:none;" title="Tildel til selger">
+          <option value="">Tildel…</option>
+          ${sbSelgere.map(s=>`<option value="${s.brukernavn}">${s.navn}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+  const thCols=['navn','nace_kode',null,null,'score','ansatte','opprettet'];
+  document.querySelectorAll('th').forEach((th,i)=>{ th.className=thCols[i]===sortCol?sortDir:''; });
+}
+
+function sortBy(col) { sortDir=sortCol===col?(sortDir==='asc'?'desc':'asc'):'desc'; sortCol=col; curPage=1; renderTable(); renderPag(); }
+function renderPag() {
+  const filtered = results.filter(r=>r.kurs_treff?.length>0);
+  const pages = Math.ceil(filtered.length/PER);
+  const pag = document.getElementById('pag');
+  if (!pag) return;
+  if (pages <= 1) { pag.style.display='none'; return; }
+  pag.style.display = 'flex';
+  const info = document.getElementById('pagInfo');
+  if (info) info.textContent = `Side ${curPage} av ${pages} · ${filtered.length} leads`;
+  const prev = document.getElementById('pagPrev');
+  const next = document.getElementById('pagNext');
+  if (prev) prev.disabled = curPage <= 1;
+  if (next) next.disabled = curPage >= pages;
+}
+function goPage(p){const pages=Math.ceil(results.filter(r=>r.kurs_treff?.length>0).length/PER);if(p<1||p>pages)return;curPage=p;renderTable();renderPag();window.scrollTo({top:0,behavior:'smooth'});}
+function prevPage(){goPage(curPage-1);}
+function nextPage(){goPage(curPage+1);}
+
+// ── EKSPORT ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const h=['Navn','OrgNr','Sted','NACE','Ansatte','Registrert','Score','Aktivitet','Kurs'];
+  const rows=results.map(r=>[r.navn,r.orgnr,r.sted||'',r.nace_kode,r.ansatte,r.opprettet||'',(r.aktivitet||'').slice(0,200).replace(/"/g,"'"),(r.kurs_treff||[]).map(k=>k.kurs).join('; '),r.score||0]);
+  dlFile('leads-systemfag.csv',[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n'),'text/csv');
+  toast('CSV eksportert!');
+}
+
+function exportExcel() {
+  if (!results.length) { toast('Ingen leads å eksportere', true); return; }
+  const alleKurs = Object.keys(KURS_DEF);
+  const wb = XLSX.utils.book_new();
+
+  function lagRad(r) {
+    return {
+      'Bedriftsnavn': r.navn, 'Org.nr': r.orgnr, 'Sted': r.sted||'',
+      'NACE': r.nace_kode, 'Ansatte': r.ansatte||0, 'Registrert': r.opprettet||'',
+      'Score': r.score||0, 'Aktivitet': (r.aktivitet||'').slice(0,200),
+      'Kontaktet': '', 'Merknad': '',
+    };
+  }
+
+  function lagArk(rader, navn) {
+    if (!rader.length) return;
+    const ws = XLSX.utils.json_to_sheet(rader);
+    ws['!cols']=[{wch:32},{wch:13},{wch:16},{wch:10},{wch:9},{wch:12},{wch:8},{wch:50},{wch:12},{wch:25}];
+    ws['!autofilter']={ref:'A1:J1'};
+    ws['!freeze']={xSplit:0,ySplit:1};
+    XLSX.utils.book_append_sheet(wb, ws, navn);
+  }
+
+  for (const kurs of alleKurs) {
+    const leads = results
+      .filter(r => (r.kurs_treff||[]).some(t => t.kurs === kurs))
+      .sort((a,b) => (b.score||0)-(a.score||0))
+      .map(lagRad);
+    if (leads.length) lagArk(leads, KURS_DEF[kurs].icon+' '+kurs.slice(0,25));
+  }
+
+  if (wb.SheetNames.length === 0) { toast('Ingen leads med kurstreff', true); return; }
+  XLSX.writeFile(wb, 'leads-systemfag.xlsx');
+  toast('✓ Leads eksportert!');
+}
+
+function copyList() {
+  const txt=results.map(r=>`${r.navn} (${r.orgnr}) — ${r.sted} — ${r.ansatte} ans — Score:${r.score} — ${(r.kurs_treff||[]).map(k=>k.kurs).join(', ')}`).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('Kopiert!'));
+}
+function startApp() {
+  document.getElementById('app').classList.add('on');
+  const splash = document.getElementById('splash');
+  if (splash) {
+    splash.classList.add('hide');
+    setTimeout(() => { splash.classList.add('gone'); }, 520);
+  }
+}
+
+async function quickTildel(e, orgnr) {
+  const selger = e.target.value;
+  if (!selger) return;
+  const r = results.find(x => x.orgnr === orgnr);
+  if (!r) return;
+  const sel = e.target;
+  sel.disabled = true;
+  try {
+    await tildelLead(r, selger);
+    const selgerNavn = sbSelgere.find(s=>s.brukernavn===selger)?.navn || selger;
+    toast(`✓ ${r.navn} → ${selgerNavn}`);
+    // Fjern leaden fra visningen — tildelte leads skal ikke vises for prospektør
+    results = results.filter(x => x.orgnr !== orgnr);
+    curPage = Math.min(curPage, Math.ceil(results.filter(r=>r.kurs_treff?.length>0).length/PER) || 1);
+    renderTable();
+    renderPag();
+  } catch(err) {
+    sel.disabled = false;
+    sel.value = '';
+    toast('Feil ved tildeling: ' + err.message, true);
+  }
+}
+
+// Last selgere når appen starter og refresh dropdowns
+async function initSelgere() {
+  await lastSelgere();
+  // Re-render table if results exist so dropdowns get populated
+  if (results.length > 0) renderTable();
+}
+initSelgere();
+
+// ── SELGER-ADMIN ──────────────────────────────────────────────────────────────
+async function visAdminPanel() {
+  document.getElementById('adminModal').classList.remove('hidden');
+  document.getElementById('modalMsg').textContent = '';
+  document.getElementById('modalMsg').className = 'modal-msg';
+  await renderSelgerList();
+}
+
+function lukkAdmin() {
+  document.getElementById('adminModal').classList.add('hidden');
+}
+
+async function renderSelgerList() {
+  await lastSelgere();
+  const list = document.getElementById('selgerListAdmin');
+  if (!sbSelgere.length) {
+    list.innerHTML = '<div style="font-size:.8rem;color:var(--muted);text-align:center;padding:.5rem">Ingen selgere ennå.</div>';
+    return;
+  }
+  list.innerHTML = sbSelgere.map(s => `
+    <div class="selger-row">
+      <div>
+        <div class="selger-navn">${s.navn}</div>
+        <div class="selger-brukernavn">${s.brukernavn}</div>
+      </div>
+      <button class="selger-del-btn" onclick="slettSelger('${s.brukernavn}','${s.navn}')">Slett</button>
+    </div>`).join('');
+}
+
+async function slettSelger(brukernavn, navn) {
+  if (!confirm(`Slett ${navn}? Alle tildelte leads beholdes men blir uten selger.`)) return;
+  try {
+    await sb('DELETE', 'selgere', null, `?brukernavn=eq.${encodeURIComponent(brukernavn)}`);
+    toast(`✓ ${navn} slettet`);
+    await renderSelgerList();
+  } catch(e) { toast('Feil: ' + e.message, true); }
+}
+
+async function leggTilSelger() {
+  const navn      = document.getElementById('nyNavn').value.trim();
+  const brukernavn= document.getElementById('nyBrukernavn').value.trim().toLowerCase();
+  const passord   = document.getElementById('nyPassord').value;
+  const passord2  = document.getElementById('nyPassord2').value;
+  const msg       = document.getElementById('modalMsg');
+  const btn       = document.getElementById('addSelgerBtn');
+  msg.textContent = ''; msg.className = 'modal-msg';
+
+  if (!navn || !brukernavn || !passord) { msg.textContent = 'Fyll inn alle felt.'; msg.classList.add('err'); return; }
+  if (passord !== passord2) { msg.textContent = 'Passordene er ikke like.'; msg.classList.add('err'); return; }
+  if (brukernavn.length < 3) { msg.textContent = 'Brukernavn må være minst 3 tegn.'; msg.classList.add('err'); return; }
+
+  btn.disabled = true; btn.textContent = 'Legger til…';
+  try {
+    const hash = await sha256(passord);
+    await sb('POST', 'selgere', { brukernavn, navn, passord_hash: hash });
+    msg.textContent = `✓ ${navn} er lagt til!`; msg.classList.add('ok');
+    document.getElementById('nyNavn').value = '';
+    document.getElementById('nyBrukernavn').value = '';
+    document.getElementById('nyPassord').value = '';
+    document.getElementById('nyPassord2').value = '';
+    await renderSelgerList();
+    toast(`✓ ${navn} lagt til som selger`);
+  } catch(e) {
+    msg.textContent = brukernavn + ' er allerede i bruk.'; msg.classList.add('err');
+  } finally {
+    btn.disabled = false; btn.textContent = '+ Legg til selger';
+  }
+}
+
+
+// ── MAIN TAB SWITCHING ────────────────────────────────────────────────────────
+function switchMainTab(id, btn) {
+  document.querySelectorAll('.main-tab-panel').forEach(t => t.classList.remove('act'));
+  document.querySelectorAll('[onclick^="switchMainTab"]').forEach(b => b.classList.remove('act'));
+  document.getElementById('main-tab-'+id).classList.add('act');
+  btn.classList.add('act');
+  if (id === 'admin' && sessionStorage.getItem('sf_admin')) aLastData();
+}
+
+// ── ADMIN LOGIN ───────────────────────────────────────────────────────────────
+const ADMIN_HASH = '44b985d55f5f696cf3c96f058dd48bf2f72808d527fc9251ad679ba77b9d25dd';
+
+async function adminTabLogin() {
+  const p   = document.getElementById('adminTabPass').value;
+  const err = document.getElementById('adminTabErr');
+  err.style.display = 'none';
+  const h = await sha256(p);
+  if (h !== ADMIN_HASH) {
+    err.style.display = 'block';
+    document.getElementById('adminTabPass').value = '';
+    return;
+  }
+  sessionStorage.setItem('sf_admin', '1');
+  document.getElementById('adminLoginOverlay').style.display = 'none';
+  document.getElementById('adminContent').style.display = 'block';
+  aLastData();
+}
+
+// Check if already logged in
+if (sessionStorage.getItem('sf_admin')) {
+  setTimeout(() => {
+    const ov = document.getElementById('adminLoginOverlay');
+    const ac = document.getElementById('adminContent');
+    if (ov) ov.style.display = 'none';
+    if (ac) ac.style.display = 'block';
+  }, 100);
+}
+
+// ── ADMIN SUB-TAB SWITCHING ───────────────────────────────────────────────────
+function switchAdminTab(id, btn) {
+  document.querySelectorAll('.admin-tab').forEach(t => { t.classList.remove('act'); t.style.display='none'; });
+  document.querySelectorAll('[onclick^="switchAdminTab"]').forEach(b => b.classList.remove('act'));
+  const el = document.getElementById('atab-'+id);
+  if (el) { el.classList.add('act'); el.style.display='block'; }
+  btn.classList.add('act');
+}
+
+// ── ADMIN DATA ────────────────────────────────────────────────────────────────
+let aLeads=[], aSelgere=[], aSalg=[], aForesp=[];
+const aCharts={};
+
+async function aLastData() {
+  try {
+    [aLeads, aSelgere, aSalg, aForesp] = await Promise.all([
+      sb('GET','leads',null,'?order=tildelt_dato.desc&limit=2000').catch(()=>[]),
+      sb('GET','selgere',null,'?select=brukernavn,navn,opprettet&order=navn').catch(()=>[]),
+      sb('GET','salg',null,'?order=registrert.desc&limit=500').catch(()=>[]),
+      sb('GET','lead_foresporsler',null,'?order=opprettet.desc&limit=100').catch(()=>[]),
+    ]);
+    aLeads=aLeads||[]; aSelgere=aSelgere||[]; aSalg=aSalg||[]; aForesp=aForesp||[];
+
+    aRenderOversikt();
+    aRenderSelgere();
+    aRenderForesp();
+    aRenderSalg();
+
+    // Oppdater selger-dropdown i prospekteringstabellen
+    sbSelgere = aSelgere;
+    const ventende = aForesp.filter(f=>f.status==='venter').length;
+    const badge = document.getElementById('forspBadge2');
+    if (badge) { badge.style.display = ventende>0?'inline':'none'; badge.textContent=ventende; }
+  } catch(e) { toast('Admin: feil ved lasting — '+e.message, true); }
+}
+
+// ── OVERSIKT ──────────────────────────────────────────────────────────────────
+function aRenderOversikt() {
+  const totSalg = aSalg.reduce((s,x)=>s+(x.belop||0),0);
+  const konv    = aLeads.length ? Math.round((aSalg.length/aLeads.length)*100) : 0;
+  document.getElementById('aStLeads').textContent     = aLeads.length;
+  document.getElementById('aStSalg').textContent      = aSalg.length;
+  document.getElementById('aStOmsetning').textContent = new Intl.NumberFormat('no-NO',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(totSalg);
+  document.getElementById('aStKonv').textContent      = konv+'%';
+
+  const salgPerSelger={};
+  aSalg.forEach(s=>{const k=s.selger_navn||s.selger_brukernavn||'Ukjent'; salgPerSelger[k]=(salgPerSelger[k]||0)+(s.belop||0);});
+  aLagChart('aChartSelgere','bar',Object.keys(salgPerSelger),Object.values(salgPerSelger),'Omsetning','rgba(232,93,38,.75)');
+
+  const kursCount={};
+  aSalg.forEach(s=>{kursCount[s.produkt]=(kursCount[s.produkt]||0)+1;});
+  const topKurs=Object.entries(kursCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  aLagChart('aChartKurs','bar',topKurs.map(x=>x[0]),topKurs.map(x=>x[1]),'Antall','rgba(59,130,246,.75)');
+
+  const sc={ny:0,ringt:0,tilbud:0,ferdig:0};
+  aLeads.forEach(l=>{if(sc[l.status]!==undefined)sc[l.status]++;});
+  aLagChart('aChartStatus','bar',['Ikke kontaktet','Ringt','Tilbud','Ferdig'],[sc.ny,sc.ringt,sc.tilbud,sc.ferdig],'Leads',['rgba(232,93,38,.75)','rgba(240,165,0,.75)','rgba(59,130,246,.75)','rgba(34,197,94,.75)']);
+}
+
+function aLagChart(id,type,labels,data,label,color) {
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  if(aCharts[id])aCharts[id].destroy();
+  aCharts[id]=new Chart(ctx,{
+    type,data:{labels,datasets:[{label,data,backgroundColor:Array.isArray(color)?color:data.map(()=>color),borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10},maxRotation:35}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10}}}
+    }}
+  });
+}
+
+// ── SELGERE ───────────────────────────────────────────────────────────────────
+function aRenderSelgere() {
+  const el=document.getElementById('aSelgerCards');
+  if(!el)return;
+  if(!aSelgere.length){el.innerHTML='<div style="color:var(--muted);font-size:.85rem;">Ingen selgere ennå.</div>';return;}
+  el.innerHTML=aSelgere.map(s=>{
+    const mine=aLeads.filter(l=>l.tildelt_til===s.brukernavn);
+    const mineSalg=aSalg.filter(x=>x.selger_brukernavn===s.brukernavn);
+    const omsetning=mineSalg.reduce((t,x)=>t+(x.belop||0),0);
+    const konv=mine.length?Math.round((mineSalg.length/mine.length)*100):0;
+    const ny=mine.filter(l=>l.status==='ny').length;
+    return `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:1.25rem;">
+      <div style="font-family:var(--display);font-size:.98rem;font-weight:700;margin-bottom:.15rem;">${s.navn}</div>
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:.85rem;">${s.brukernavn}</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem;">
+        <div style="background:var(--surface2);border-radius:6px;padding:.35rem .65rem;flex:1;text-align:center;">
+          <div style="font-family:var(--display);font-size:1.1rem;font-weight:700;color:var(--accent);">${mine.length}</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);">Leads</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;padding:.35rem .65rem;flex:1;text-align:center;">
+          <div style="font-family:var(--display);font-size:1.1rem;font-weight:700;color:var(--warn);">${ny}</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);">Ikke ringt</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:6px;padding:.35rem .65rem;flex:1;text-align:center;">
+          <div style="font-family:var(--display);font-size:1.1rem;font-weight:700;color:var(--success);">${mineSalg.length}</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);">Salg</div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--success);margin-bottom:.75rem;">${new Intl.NumberFormat('no-NO',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(omsetning)}</div>
+      <button onclick="aSlettSelger('${s.brukernavn}','${s.navn}')" style="font-family:var(--mono);font-size:.65rem;padding:.2rem .55rem;border-radius:4px;border:1px solid var(--danger);color:var(--danger);background:transparent;cursor:pointer;">Slett</button>
+    </div>`;
+  }).join('');
+}
+
+async function aLeggTilSelger() {
+  const navn=document.getElementById('aNyNavn').value.trim();
+  const user=document.getElementById('aNyUser').value.trim().toLowerCase();
+  const pass=document.getElementById('aNyPass').value;
+  const pass2=document.getElementById('aNyPass2').value;
+  const msg=document.getElementById('aAddMsg');
+  const btn=document.getElementById('aAddBtn');
+  msg.style.color='var(--danger)'; msg.textContent='';
+  if(!navn||!user||!pass){msg.textContent='Fyll inn alle felt.';return;}
+  if(pass!==pass2){msg.textContent='Passordene er ikke like.';return;}
+  if(pass.length<6){msg.textContent='Minimum 6 tegn i passord.';return;}
+  btn.disabled=true; btn.textContent='Legger til…';
+  try {
+    const hash=await sha256(pass);
+    await sb('POST','selgere',{brukernavn:user,navn,passord_hash:hash});
+    msg.style.color='var(--success)'; msg.textContent='✓ '+navn+' er lagt til!';
+    document.getElementById('aNyNavn').value='';
+    document.getElementById('aNyUser').value='';
+    document.getElementById('aNyPass').value='';
+    document.getElementById('aNyPass2').value='';
+    toast('✓ '+navn+' lagt til som selger');
+    await aLastData();
+  } catch(e) { msg.textContent=user+' er allerede i bruk.'; }
+  finally { btn.disabled=false; btn.textContent='+ Legg til selger'; }
+}
+
+async function aSlettSelger(brukernavn, navn) {
+  if(!confirm('Slett '+navn+'? Leads som er tildelt denne selgeren beholdes men blir uten selger.')) return;
+  try {
+    // Nullstill leads som tilhører denne selgeren før sletting
+    await sb('PATCH','leads',{tildelt_til: null},'?tildelt_til=eq.'+encodeURIComponent(brukernavn));
+    // Nullstill salg-referanser
+    await sb('PATCH','salg',{selger_brukernavn: null},'?selger_brukernavn=eq.'+encodeURIComponent(brukernavn)).catch(()=>{});
+    // Nå kan vi slette selgeren
+    await sb('DELETE','selgere',null,'?brukernavn=eq.'+encodeURIComponent(brukernavn));
+    toast('✓ '+navn+' slettet');
+    await aLastData();
+  } catch(e) { toast('Feil: '+e.message,true); }
+}
+
+// ── FORESPØRSLER ──────────────────────────────────────────────────────────────
+function aRenderForesp() {
+  const el=document.getElementById('aForspListe');
+  if(!el)return;
+  const ventende=aForesp.filter(f=>f.status==='venter');
+  if(!ventende.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted);">Ingen ventende forespørsler 🎉</div>';return;}
+  el.innerHTML=ventende.map(f=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:.5rem;display:flex;align-items:start;gap:1rem;">
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:.9rem;margin-bottom:.3rem;">${f.selger_navn}</div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);line-height:1.6;">
+          ${f.bransje?'Bransje: '+f.bransje+'<br>':''}
+          ${f.kurs?'Kurs: '+f.kurs+'<br>':''}
+          ${f.melding||'Ingen melding'}
+        </div>
+        <div style="font-family:var(--mono);font-size:.63rem;color:var(--muted);margin-top:.3rem;">${new Date(f.opprettet).toLocaleDateString('no-NO')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;">
+        <button class="btn" style="font-size:.75rem;padding:.4rem .85rem;" onclick="aBehandleForesp('${f.id}','behandlet')">✓ Behandlet</button>
+        <button style="font-family:var(--mono);font-size:.72rem;padding:.35rem .75rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;" onclick="aBehandleForesp('${f.id}','avvist')">Avvis</button>
+      </div>
+    </div>`).join('');
+}
+
+async function aBehandleForesp(id, status) {
+  try {
+    await sb('PATCH','lead_foresporsler',{status},'?id=eq.'+id);
+    toast(status==='behandlet'?'✓ Behandlet':'Avvist');
+    await aLastData();
+  } catch(e) { toast('Feil: '+e.message,true); }
+}
+
+// ── SALG ──────────────────────────────────────────────────────────────────────
+function aRenderSalg() {
+  const el=document.getElementById('aSalgListe');
+  if(!el)return;
+  if(!aSalg.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted);">Ingen salg registrert ennå.</div>';return;}
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.81rem;">
+    <thead><tr style="border-bottom:1px solid var(--border);">
+      ${['Selger','Bedrift','Produkt','Beløp','Dato'].map(h=>`<th style="font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:.6rem .75rem;text-align:left;">${h}</th>`).join('')}
+    </tr></thead>
+    <tbody>
+      ${aSalg.map(s=>`<tr style="border-bottom:1px solid rgba(42,47,66,.4);">
+        <td style="padding:.6rem .75rem;font-weight:500;">${s.selger_navn||s.selger_brukernavn}</td>
+        <td style="padding:.6rem .75rem;">${s.bedrift_navn}</td>
+        <td style="padding:.6rem .75rem;"><span style="font-family:var(--mono);font-size:.67rem;padding:.15rem .45rem;border-radius:4px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:var(--accent2);">${s.produkt}</span></td>
+        <td style="padding:.6rem .75rem;font-family:var(--mono);color:var(--success);">${new Intl.NumberFormat('no-NO',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(s.belop)}</td>
+        <td style="padding:.6rem .75rem;font-family:var(--mono);font-size:.69rem;color:var(--muted);">${new Date(s.registrert).toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'})}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+
+// ── TILDEL ALLE LEADS ─────────────────────────────────────────────────────────
+function oppdaterTildelPreview() {
+  const valgte = [...document.querySelectorAll('.tildel-chk:checked')].map(el => el.value);
+  const leads  = results.filter(r => r.kurs_treff?.length > 0);
+  const n      = valgte.length;
+  const per    = n > 0 ? Math.floor(leads.length / n) : 0;
+  const rest   = n > 0 ? leads.length % n : 0;
+
+  document.getElementById('tildelAlleInfo').innerHTML = n === 0
+    ? `<span style="color:var(--text3)">Huk av minst én selger for å se fordeling.</span>`
+    : `<strong style="color:var(--text)">${leads.length} leads</strong> fordeles på <strong style="color:var(--text)">${n} selger${n!==1?'e':''}</strong> — ca. <strong style="color:var(--accent)">${per}–${per+1} per selger</strong>, etter score.`;
+
+  // Update count badges
+  document.querySelectorAll('.tildel-chk').forEach((chk, i) => {
+    const badge = document.getElementById('tildel-badge-'+i);
+    if (!badge) return;
+    if (chk.checked) {
+      const idx = valgte.indexOf(chk.value);
+      const tildeles = per + (idx < rest ? 1 : 0);
+      badge.textContent = tildeles;
+      badge.style.color = 'var(--accent)';
+    } else {
+      badge.textContent = '–';
+      badge.style.color = 'var(--text3)';
+    }
+  });
+
+  document.getElementById('tildelAlleBtn').disabled = n === 0;
+}
+
+async function visTildelAlle() {
+  if (!results.length) { toast('Ingen leads å tildele', true); return; }
+  await lastSelgere();
+  if (!sbSelgere.length) {
+    toast('Ingen selgere registrert — legg til selgere i Admin-fanen først', true);
+    return;
+  }
+
+  const leads = results.filter(r => r.kurs_treff?.length > 0);
+
+  document.getElementById('tildelAlleSelgere').innerHTML = sbSelgere.map((s,i) => `
+    <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg2);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:border-color .12s;"
+      onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+      <input type="checkbox" class="tildel-chk" value="${s.brukernavn}" checked
+        style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0;"
+        onchange="oppdaterTildelPreview()"/>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${s.navn}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:1px;">${s.brukernavn}</div>
+      </div>
+      <div id="tildel-badge-${i}" style="font-size:15px;font-weight:800;min-width:24px;text-align:right;color:var(--accent);">
+        ${Math.floor(leads.length/sbSelgere.length) + (i < leads.length%sbSelgere.length ? 1 : 0)}
+      </div>
+    </label>`).join('');
+
+  document.getElementById('tildelAlleMsg').textContent = '';
+  document.getElementById('tildelAlleModal').classList.remove('hidden');
+  oppdaterTildelPreview();
+}
+
+function lukkTildelAlle() {
+  document.getElementById('tildelAlleModal').classList.add('hidden');
+}
+
+async function tildelAlleTilSelgere() {
+  const btn = document.getElementById('tildelAlleBtn');
+  const msg = document.getElementById('tildelAlleMsg');
+  btn.disabled = true; btn.textContent = 'Tildeler…';
+  msg.style.color = 'var(--muted)'; msg.textContent = '';
+
+  try {
+    const valgte = [...document.querySelectorAll('.tildel-chk:checked')].map(el => el.value);
+    const valgteSelgere = sbSelgere.filter(s => valgte.includes(s.brukernavn));
+    if (!valgteSelgere.length) throw new Error('Ingen selgere valgt');
+
+    // Sorter alle leads etter score (høyest først)
+    const sorterte = [...results]
+      .filter(r => r.kurs_treff?.length > 0)
+      .sort((a,b) => (b.score||0) - (a.score||0));
+
+    const n = valgteSelgere.length;
+    
+    // Fordel rettferdig med round-robin på sortert liste
+    const fordelt = valgteSelgere.map(() => []);
+    sorterte.forEach((lead, i) => {
+      fordelt[i % n].push(lead);
+    });
+
+    let tildelt = 0;
+    const bolk = 20;
+    const alleOps = [];
+
+    for (let si = 0; si < valgteSelgere.length; si++) {
+      const selger = valgteSelgere[si];
+      for (const lead of fordelt[si]) {
+        alleOps.push({ lead, selger: selger.brukernavn });
+      }
+    }
+
+    // Kjør i bolker
+    for (let i = 0; i < alleOps.length; i += bolk) {
+      const gruppe = alleOps.slice(i, i + bolk);
+      await Promise.all(gruppe.map(({lead, selger}) =>
+        tildelLead(lead, selger).catch(e => console.warn('Feil for lead:', lead.orgnr, e.message))
+      ));
+      tildelt += gruppe.length;
+      btn.textContent = `⏳ ${tildelt}/${alleOps.length} tildelt…`;
+    }
+
+    msg.style.color = 'var(--success)';
+    msg.textContent = `✓ ${tildelt} leads fordelt på ${valgteSelgere.length} selger${valgteSelgere.length!==1?"e":""}!`;
+    toast(`✓ ${tildelt} leads fordelt på ${valgteSelgere.length} selger${valgteSelgere.length!==1?"e":""}`);
+    // Fjern alle tildelte leads fra prospektørvisningen
+    const tildelteOrgnr = new Set(alleOps.map(o => o.lead.orgnr));
+    results = results.filter(r => !tildelteOrgnr.has(r.orgnr));
+    curPage = 1;
+    renderTable();
+    renderPag();
+    setTimeout(lukkTildelAlle, 2000);
+
+  } catch(e) {
+    msg.style.color = 'var(--danger)';
+    msg.textContent = 'Feil: ' + e.message;
+    toast('Feil: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = '🎯 Fordel nå';
+  }
+}
+
+function dlFile(n,c,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:t}));a.download=n;a.click();}
+
+
+
+// ── NEW RENDER FUNCTION (3C card rows) ────────────────────────────────────────
+function renderTable() {
+  const kurs = getKurs();
+  const sorted = [...results]
+    .filter(r => r.kurs_treff && r.kurs_treff.length > 0)
+    .sort((a,b) => {
+      const av = a[sortCol], bv = b[sortCol];
+      if (av==null&&bv==null) return 0;
+      if (av==null) return 1; if (bv==null) return -1;
+      return sortDir==='asc' ? (av>bv?1:-1) : (av<bv?1:-1);
+    });
+  const pg = sorted.slice((curPage-1)*PER, curPage*PER);
+  const body = document.getElementById('resultsBody');
+  if (!pg.length) {
+    body.innerHTML = '<div class="empty-state"><div style="width:32px;height:32px;border-radius:6px;background:var(--bg3);margin:0 auto .75rem;"></div><p>Ingen resultater ennå. Start Fase 1.</p></div>';
+    document.getElementById('pag').style.display='none';
+    return;
+  }
+  body.innerHTML = pg.map((r,i) => {
+    const sc = r.score||0;
+    const bc = sc>=80 ? 'var(--accent)' : sc>=50 ? '#b07040' : 'var(--border2)';
+    const tier = sc>=80 ? 'hi' : sc>=50 ? 'med' : 'lo';
+    const ny = isNy(r.opprettet);
+    const kursHtml = r.kurs_treff?.length
+      ? `<div class="km-wrap">${r.kurs_treff.map(k=>`<span class="km ${k.prioritet}">${k.kurs}</span>`).join('')}</div>`
+      : '<span style="color:var(--text3);font-size:11px;">–</span>';
+    const aktivitetHtml = r.aktivitet
+      ? `<div class="rc-akt">«${highlightText(r.aktivitet.slice(0,130),kurs)}${r.aktivitet.length>130?'…':''}»</div>`
+      : (r.kurs_treff?.some(t=>t.kilde==='navn')
+        ? '<div class="rc-akt warn">Ingen aktivitetstekst — treff i firmanavn</div>'
+        : '<span style="color:var(--text3);font-size:11px;">–</span>');
+    return `<div class="result-card ${tier} fade" style="animation-delay:${i*.02}s">
+      <div class="rc">
+        <div class="rc-name">${r.navn}</div>
+        <div class="rc-sub">${r.orgnr}${r.sted?' · '+r.sted:''}${r.orgform?' · '+r.orgform:''}</div>
+      </div>
+      <div class="rc" style="padding:.65rem .5rem;">
+        <div class="rc-nace">${r.nace_kode||'–'}</div>
+        <div class="rc-nacelabel">${(r.nace_label||'').slice(0,30)}</div>
+      </div>
+      <div class="rc">${aktivitetHtml}</div>
+      <div class="rc">${kursHtml}</div>
+      <div class="rc" style="padding:.65rem .5rem;">
+        <div class="sb">
+          <div class="sb-t"><div class="sb-f" style="width:${sc}%;background:${bc};"></div></div>
+          <span class="sn" style="color:${bc}">${sc}</span>
+        </div>
+      </div>
+      <div class="rc" style="padding:.65rem .5rem;">
+        <span class="emp">${r.ansatte||0}</span>
+      </div>
+      <div class="rc" style="padding:.65rem .5rem;">
+        <div style="font-family:var(--mono);font-size:9.5px;color:${ny?'var(--green)':'var(--text2)'};">${fmtD(r.opprettet)}</div>
+        ${ny ? '<div style="font-family:var(--mono);font-size:8.5px;color:var(--green);margin-top:1px;font-weight:600;">Ny</div>' : ''}
+        <select onchange="quickTildel(event,'${r.orgnr}')" style="margin-top:4px;width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:9px;padding:2px 4px;cursor:pointer;outline:none;" title="Tildel til selger">
+          <option value="">Tildel…</option>
+          ${sbSelgere.map(s=>`<option value="${s.brukernavn}">${s.navn}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update headers sort indicators
+  const cols = ['navn','nace_kode',null,null,'score','ansatte','opprettet'];
+  document.querySelectorAll('.rh').forEach((rh,i) => {
+    rh.className = 'rh';
+    if (cols[i] === sortCol) rh.classList.add(sortDir);
+  });
+
+  // Pagination
+  const totalPg = Math.ceil(sorted.length/PER);
+  const pag = document.getElementById('pag');
+  if (totalPg > 1) {
+    pag.style.display='flex';
+    document.getElementById('pagInfo').textContent = `Side ${curPage} av ${totalPg} · ${sorted.length} leads`;
+    document.getElementById('pagPrev').disabled = curPage <= 1;
+    document.getElementById('pagNext').disabled = curPage >= totalPg;
+  } else {
+    pag.style.display='none';
+  }
+}
+
+// Override byggKursList — hover tooltip, no info button
+function byggKursList() {
+  const kategorier = {};
+  for (const [navn, def] of Object.entries(KURS_DEF)) {
+    if (!kategorier[def.kategori]) kategorier[def.kategori] = [];
+    kategorier[def.kategori].push({ navn, ...def });
+  }
+  let html = '';
+  for (const [kat, kurs] of Object.entries(kategorier)) {
+    html += `<span class="sb-sec">${kat}</span>`;
+    for (const k of kurs) {
+      html += `<button class="kurs-item on" data-kurs="${k.navn}"
+        onclick="toggleKurs(this)"
+        onmouseenter="showKursTooltip(event,'${k.navn.replace(/'/g,"\'")}',this)"
+        onmouseleave="hideKursTooltip()">
+        <div class="kurs-dot"></div>
+        <span class="kn">${k.navn}</span>
+        <span class="kurs-check">✓</span>
+      </button>`;
+    }
+  }
+  document.getElementById('kursList').innerHTML = html;
+}
+byggKursList();;
+
+// Override setProgress to use new progress bar
+function setProgress(pct) {
+  document.getElementById('prog').style.width = pct + '%';
+}
+
+// Override setStatus to use new status bar
+function setStatus(msg, type='idle') {
+  document.getElementById('statusMsg').textContent = msg;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'sd ' + type;
+}
+
+// Redirect to index if not authed
+if (!sessionStorage.getItem('sf_auth')) {
+  window.location.href = 'index.html';
+}
+</script>
+
+<footer class="site-footer">
+  <span class="footer-copy">&copy; 2025 Systemfag Norge AS. Alle rettigheter forbeholdt.</span>
+  <span class="footer-dev">Utviklet av <span>Martin Haugom Engedahl</span></span>
+</footer>
+
+</body>
+</html>

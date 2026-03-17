@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Systemfag — Selgerportal</title>
+<style>
+
+:root {
+  --bg:      #f5f2ee;
+  --bg2:     #ede8e0;
+  --bg3:     #e4ddd2;
+  --white:   #ffffff;
+  --header:  #1a120a;
+  --border:  #e4dbd0;
+  --border2: #d4c8b8;
+  --accent:  #e8512a;
+  --accent2: #c8400e;
+  --accentbg:#faeae0;
+  --accentb2:rgba(232,81,42,.18);
+  --green:   #1a8a3c;
+  --greenbg: #eaf5ec;
+  --greenb:  rgba(26,138,60,.2);
+  --blue:    #1a5fa0;
+  --bluebg:  #e8f0fa;
+  --blueb:   rgba(26,95,160,.2);
+  --warn:    #8a5800;
+  --warnbg:  #fdf3dc;
+  --warnb:   rgba(138,88,0,.2);
+  --red:     #a02020;
+  --redbg:   #faeaea;
+  --redb:    rgba(160,32,32,.2);
+  --text:    #1a120a;
+  --text2:   #7a6858;
+  --text3:   #a89878;
+  --mono:    'DM Mono', monospace;
+  --sans:    'DM Sans', -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 46px;
+  background: var(--header);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-mark { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.logo-sq { width: 6px; height: 6px; border-radius: 1.5px; background: var(--accent); }
+.logo-name { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: -.01em; }
+.logo-name b { color: var(--accent); font-weight: 700; }
+.topbar-sep { width: 1px; height: 14px; background: rgba(255,255,255,.1); }
+.topbar-live { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,.35); font-family: var(--mono); }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ── NAV ── */
+.nav { display: flex; border-bottom: 1px solid var(--border); background: var(--bg2); padding: 0 20px; }
+.nav-btn { font-size: 11px; font-weight: 500; color: var(--text3); padding: 0 14px; height: 40px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s; white-space: nowrap; }
+.nav-btn:hover { color: var(--text); }
+.nav-btn.act { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── BUTTONS ── */
+.btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--sans); font-size: 12px; font-weight: 600; padding: .45rem 1rem; cursor: pointer; transition: all .12s; white-space: nowrap; display: inline-flex; align-items: center; gap: .35rem; }
+.btn:hover { background: var(--accent2); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-family: var(--sans); font-size: 11px; font-weight: 500; padding: .38rem .85rem; cursor: pointer; transition: all .12s; white-space: nowrap; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accentbg); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid var(--redb); border-radius: 5px; font-family: var(--mono); font-size: 11px; padding: .22rem .5rem; cursor: pointer; transition: all .12s; }
+.btn-danger:hover { background: var(--redbg); }
+
+/* ── INPUTS ── */
+.inp { width: 100%; background: var(--white); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: var(--sans); font-size: 13px; padding: .5rem .8rem; outline: none; transition: border-color .12s, box-shadow .12s; }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,81,42,.1); }
+.inp::placeholder { color: var(--text3); }
+select.inp option { background: var(--white); }
+.lbl { display: block; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); margin-bottom: .35rem; }
+
+/* ── CARDS ── */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.card-accent { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.25rem; border-left: 3px solid var(--accent); }
+
+/* ── STAT CARDS ── */
+.stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; }
+.stat-n { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
+.stat-l { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .09em; color: var(--text2); margin-top: .35rem; }
+
+/* ── TAGS ── */
+.tag { font-family: var(--mono); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.tag-accent { background: var(--accentbg); color: #7a2808; border: 1px solid var(--accentb2); }
+.tag-green  { background: var(--greenbg); color: var(--green); border: 1px solid var(--greenb); }
+.tag-blue   { background: var(--bluebg);  color: var(--blue);  border: 1px solid var(--blueb); }
+.tag-warn   { background: var(--warnbg);  color: var(--warn);  border: 1px solid var(--warnb); }
+.tag-red    { background: var(--redbg);   color: var(--red);   border: 1px solid var(--redb); }
+.tag-muted  { background: var(--bg2);     color: var(--text2); border: 1px solid var(--border); }
+
+/* ── LEAD CARD ── */
+.lead-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; display: grid; grid-template-columns: 1fr 210px; gap: 1.25rem; align-items: start; margin-bottom: 7px; transition: border-color .12s; padding: 0 1.25rem; height: 56px; align-items: center; overflow: hidden; }
+.lead-card.expanded { height: auto; padding: 1rem 1.25rem; align-items: start; }
+.lead-card:hover { border-color: var(--border2); }
+.lead-card.s-ny     { border-left: 3px solid var(--accent); }
+.lead-card.s-ringt  { border-left: 3px solid var(--warn); }
+.lead-card.s-tilbud { border-left: 3px solid var(--blue); }
+.lead-card.s-ferdig { border-left: 3px solid var(--green); }
+.lead-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.lead-meta { font-family: var(--mono); font-size: 10px; color: var(--text2); display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 2px; }
+
+/* ── SCORE ── */
+.score-wrap { display: flex; align-items: center; gap: 5px; }
+.score-n { font-size: 14px; font-weight: 800; min-width: 26px; letter-spacing: -.02em; }
+.score-bar { flex: 1; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; min-width: 30px; }
+.score-fill { height: 100%; border-radius: 2px; }
+
+/* ── MODAL ── */
+.modal-bg { position: fixed; inset: 0; z-index: 9000; background: rgba(26,18,10,.5); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-bg.hidden { display: none; }
+.modal { background: var(--white); border: 1px solid var(--border2); border-radius: 12px; padding: 1.75rem; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(26,18,10,.2); }
+.modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.modal-close { background: transparent; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: .2rem .4rem; border-radius: 4px; }
+.modal-close:hover { background: var(--bg2); }
+
+/* ── SECTION ── */
+.sec { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--text2); margin: 1.25rem 0 .75rem; display: flex; align-items: center; gap: .5rem; }
+.sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec:first-child { margin-top: 0; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); padding: .6rem .85rem; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: .65rem .85rem; border-bottom: 1px solid var(--bg2); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg); }
+
+/* ── PHASE STRIP ── */
+.phase-strip { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--border); background: var(--bg2); }
+.phase-block { padding: 12px 18px; border-right: 1px solid var(--border); }
+.phase-block:last-child { border-right: none; }
+.phase-block.active { background: #fff8f4; }
+.phase-label { font-family: var(--mono); font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin-bottom: 2px; }
+.phase-title { font-size: 11.5px; font-weight: 600; color: var(--text); }
+.phase-count { font-size: 22px; font-weight: 800; letter-spacing: -.03em; margin: 3px 0; }
+.phase-btn { font-size: 10px; font-weight: 600; padding: 4px 9px; border-radius: 4px; border: none; cursor: pointer; }
+.phase-btn.done { background: var(--greenbg); color: var(--green); }
+.phase-btn.go   { background: var(--accent); color: #fff; }
+
+/* ── SIDEBAR ── */
+.sidebar { border-right: 1px solid var(--border); padding: 14px 11px; background: var(--bg2); min-height: calc(100vh - 46px); }
+.sidebar-label { font-family: var(--mono); font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); margin-bottom: 8px; margin-top: 12px; display: block; }
+.sidebar-label:first-child { margin-top: 0; }
+.kurs-item { display: flex; align-items: center; gap: 7px; padding: 5px 7px; border-radius: 4px; cursor: pointer; margin-bottom: 1px; user-select: none; }
+.kurs-item:hover { background: rgba(232,81,42,.05); }
+.kurs-item.on { background: rgba(232,81,42,.08); }
+.kurs-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--bg3); flex-shrink: 0; transition: background .12s; }
+.kurs-item.on .kurs-dot { background: var(--accent); }
+.kurs-name { font-size: 11px; color: var(--text2); }
+.kurs-item.on .kurs-name { color: var(--text); font-weight: 500; }
+
+/* ── SPINNER ── */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--header); color: #fff; border-radius: 8px; padding: .6rem 1rem; font-size: 12px; opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 9999; max-width: 280px; }
+#toast.show { opacity: 1; transform: none; }
+#toast.err { background: #6a1010; }
+
+/* ── FADE ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade { animation: fadeUp .25s ease both; }
+
+/* ── STATUS BAR ── */
+.status-bar { display: flex; align-items: center; gap: .6rem; padding: .55rem .9rem; background: var(--white); border: 1px solid var(--border); border-radius: 7px; font-family: var(--mono); font-size: 11px; margin-bottom: .65rem; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.idle { background: var(--bg3); }
+.status-dot.run  { background: var(--accent); animation: pulse .8s infinite; }
+.status-dot.ok   { background: var(--green); }
+.status-dot.err  { background: var(--red); }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .lead-card { grid-template-columns: 1fr; height: auto; padding: 1rem 1.25rem; }
+  .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+
+/* ── SPLASH ── */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  transition: opacity .4s;
+}
+#splash.vis  { display: flex; }
+#splash.hide { opacity: 0; pointer-events: none; }
+
+/* ── APP ── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+#app.vis { display: flex; }
+
+/* ── KØ-KORT ── */
+.kort-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 1.5rem; }
+.kort-search { width: 100%; max-width: 660px; background: var(--white); border: 1px solid var(--border2); border-radius: 7px; font-size: 13px; padding: .5rem .9rem; outline: none; margin-bottom: 1rem; transition: border-color .12s; }
+.kort-search:focus { border-color: var(--accent); }
+.kort-progress { width: 100%; max-width: 660px; display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem; }
+.kort-prog-track { flex: 1; height: 3px; background: var(--bg3); border-radius: 2px; }
+.kort-prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+.kort-counter { font-family: var(--mono); font-size: 11px; color: var(--text2); white-space: nowrap; }
+.kort-nav-btn { background: transparent; border: 1px solid var(--border2); border-radius: 5px; color: var(--text2); font-family: var(--mono); font-size: 11px; padding: .28rem .65rem; cursor: pointer; }
+.kort-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.kort-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ── LEAD-KORT ── */
+.lead-kort { background: var(--white); border: 1px solid var(--border); border-radius: 10px; width: 100%; max-width: 660px; box-shadow: 0 2px 12px rgba(26,18,10,.06); animation: fadeUp .2s ease; }
+.lk-header { padding: 1.1rem 1.4rem .9rem; border-bottom: 1px solid var(--border); display: flex; align-items: start; gap: 1rem; }
+.lk-score  { font-size: 26px; font-weight: 800; letter-spacing: -.04em; min-width: 40px; text-align: center; flex-shrink: 0; }
+.lk-name   { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.lk-meta   { font-family: var(--mono); font-size: 10px; color: var(--text2); display: flex; gap: .5rem; flex-wrap: wrap; }
+.lk-links  { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; margin-left: auto; flex-shrink: 0; }
+.lk-link   { font-family: var(--mono); font-size: 9.5px; color: var(--text2); text-decoration: none; padding: .18rem .45rem; border: 1px solid var(--border); border-radius: 4px; }
+.lk-link:hover { color: var(--blue); border-color: var(--blue); }
+.lk-body   { padding: .9rem 1.4rem; border-bottom: 1px solid var(--border); }
+.lk-akt    { font-size: 11.5px; color: var(--text2); font-style: italic; line-height: 1.5; background: var(--bg2); border-radius: 6px; padding: .65rem .85rem; margin-bottom: .7rem; }
+.lk-akt em { color: var(--accent2); font-style: normal; font-weight: 600; }
+
+/* Kontakt */
+.lk-kontakt { padding: .75rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.lk-kontakt-info { flex: 1; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+
+/* Notat */
+.lk-notat { padding: .75rem 1.4rem; border-bottom: 1px solid var(--border); }
+.notat-ta { width: 100%; background: var(--white); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; padding: .45rem .7rem; outline: none; resize: none; height: 58px; line-height: 1.4; transition: border-color .12s; }
+.notat-ta:focus { border-color: var(--accent); }
+
+/* Aksjoner */
+.lk-aksjon { padding: .9rem 1.4rem 1.1rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+.ax { border-radius: 7px; border: 1.5px solid var(--border); background: transparent; font-size: 11.5px; font-weight: 600; padding: .6rem .4rem; cursor: pointer; line-height: 1.3; text-align: center; color: var(--text2); transition: all .12s; }
+.ax span { font-size: 10px; font-weight: 400; color: var(--text3); display: block; }
+.ax:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(26,18,10,.09); }
+.ax.oppfolging:hover { background: var(--bluebg);  border-color: var(--blue);   color: var(--blue);  }
+.ax.gi-opp:hover     { background: var(--warnbg);  border-color: var(--warn);   color: var(--warn);  }
+.ax.salg             { background: var(--greenbg); border-color: var(--greenb); color: var(--green); }
+.ax.salg:hover       { background: #c5e8cc; }
+.ax.nei:hover        { background: var(--redbg);   border-color: var(--redb);   color: var(--red);   }
+.ax.send-til:hover   { background: #f3f0ff; border-color: #7c3aed; color: #7c3aed; }
+.ax.ingen-svar:hover { background: var(--bg2); }
+
+/* Oppfølging-liste */
+.oppf-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: .85rem 1.1rem; margin-bottom: .5rem; cursor: pointer; transition: border-color .12s; display: flex; align-items: center; gap: 1rem; }
+.oppf-item:hover { border-color: var(--border2); }
+.oppf-item.forfalt { border-color: var(--accent); }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--border); padding: .75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--bg2); flex-shrink: 0; }
+.footer-txt  { font-family: var(--mono); font-size: 9.5px; color: var(--text3); }
+.footer-txt span { color: var(--text2); }
+
+/* Salg-linje */
+.salg-linje { display: grid; grid-template-columns: 1fr 120px 28px; gap: .4rem; align-items: center; margin-bottom: .45rem; }
+.fjern-linje { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 15px; opacity: .6; }
+.fjern-linje:hover { opacity: 1; }
+.legg-til-linje { width: 100%; font-family: var(--mono); font-size: 11px; color: var(--accent); background: transparent; border: 1px dashed var(--accentb2); border-radius: 6px; padding: .45rem; cursor: pointer; margin-top: .35rem; }
+.legg-til-linje:hover { background: var(--accentbg); }
+
+/* Referanse */
+.ref-kort { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: .6rem .85rem; display: flex; align-items: center; gap: .75rem; margin-bottom: .4rem; cursor: pointer; }
+.ref-kort:hover { border-color: var(--accent); }
+
+@media(max-width:600px) { .lk-aksjon { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div style="text-align:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:32px;margin:0 auto 1.25rem;">
+      <div style="width:14px;height:14px;border-radius:3px;background:var(--accent);"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:var(--accent);opacity:.4;"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:var(--accent);opacity:.4;"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:var(--accent);opacity:.15;"></div>
+    </div>
+    <div style="font-size:26px;font-weight:800;letter-spacing:-.04em;margin-bottom:.25rem;">Systemfag <span style="color:var(--accent);">Leads</span></div>
+    <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:1.5rem;">Selgerportal</div>
+    <button onclick="startApp()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;padding:.7rem 2.5rem;cursor:pointer;margin-bottom:1.25rem;">Se mine leads</button>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">Utviklet av <span style="color:var(--text2);">Martin Haugom Engedahl</span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo-mark">
+      <div class="logo-sq"></div><div class="logo-sq" style="opacity:.4"></div>
+      <div class="logo-sq" style="opacity:.4"></div><div class="logo-sq" style="opacity:.15"></div>
+    </div>
+    <span class="logo-name">Systemfag <b>Leads</b></span>
+    <div class="topbar-sep"></div>
+    <span style="font-family:var(--mono);font-size:9.5px;color:rgba(255,255,255,.35);">Selgerportal</span>
+    <div class="topbar-right">
+      <span id="userBadge" style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.5);"></span>
+      <button class="btn-ghost" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.55);" onclick="visForesp()">Be om leads</button>
+      <button class="btn-ghost" style="border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.4);" onclick="loggUt()">Logg ut</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="nav-btn act" onclick="byttFane('leads',this)">Mine leads</button>
+    <button class="nav-btn" onclick="byttFane('oppfolging',this)">Oppfølginger <span id="oppfBadge" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;margin-left:3px;"></span></button>
+    <button class="nav-btn" onclick="byttFane('statistikk',this)">Statistikk</button>
+  </div>
+
+  <!-- FANE: LEADS -->
+  <div id="fane-leads" style="flex:1;display:flex;flex-direction:column;">
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;padding:.85rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);">
+      <div class="stat-card"><div class="stat-n" style="color:var(--accent);" id="stTot">–</div><div class="stat-l">Totalt</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--green);" id="stIKo">–</div><div class="stat-l">I kø</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--blue);" id="stOppf">–</div><div class="stat-l">Oppfølging</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--green);" id="stSolgt">–</div><div class="stat-l">Solgt</div></div>
+    </div>
+    <!-- Kø -->
+    <div class="kort-wrap">
+      <input class="kort-search" id="kortSearch" placeholder="Søk bedrift — havner fremst i køen…" oninput="sok(this.value)"/>
+      <div class="kort-progress">
+        <div class="kort-prog-track"><div class="kort-prog-fill" id="progFill" style="width:0%"></div></div>
+        <span class="kort-counter" id="kortTeller">0 / 0</span>
+        <button class="kort-nav-btn" id="btnForrige" onclick="forrige()" disabled>← Forrige</button>
+        <button class="kort-nav-btn" id="btnNeste" onclick="neste()">Neste →</button>
+      </div>
+      <div id="kortEl" style="width:100%;max-width:660px;"></div>
+    </div>
+  </div>
+
+  <!-- FANE: OPPFØLGINGER -->
+  <div id="fane-oppfolging" style="display:none;padding:1.5rem;">
+    <div style="font-size:15px;font-weight:700;margin-bottom:.35rem;">Oppfølginger</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:1.25rem;">Klikk for å åpne kortet i køen.</div>
+    <div id="oppfListe"></div>
+  </div>
+
+  <!-- FANE: STATISTIKK -->
+  <div id="fane-statistikk" style="display:none;padding:1.5rem;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
+      <div class="stat-card"><div class="stat-n" style="color:var(--green);" id="stSalgMnd">–</div><div class="stat-l">Salg mnd.</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--blue);" id="stKrMnd">–</div><div class="stat-l">Omsetning mnd.</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--accent);" id="stSalgTot">–</div><div class="stat-l">Totale salg</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--warn);" id="stKonv">–</div><div class="stat-l">Konvertering</div></div>
+    </div>
+    <div id="salgListe"></div>
+  </div>
+
+  <footer class="site-footer">
+    <span class="footer-txt">&copy; 2025 Systemfag Norge AS. Alle rettigheter forbeholdt.</span>
+    <span class="footer-txt">Utviklet av <span>Martin Haugom Engedahl</span></span>
+  </footer>
+</div>
+
+<!-- MODALER -->
+
+<!-- SALG -->
+<div class="modal-bg hidden" id="mSalg" onclick="if(event.target===this)lukkModal('mSalg')">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">Registrer salg</div><button class="modal-close" onclick="lukkModal('mSalg')">✕</button></div>
+    <input type="hidden" id="salgId"/>
+    <div style="margin-bottom:1rem;"><div style="font-size:13px;font-weight:600;" id="salgNavn"></div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);" id="salgOrg"></div></div>
+    <label class="lbl">Salgslinjer</label>
+    <div id="salgLinjer"></div>
+    <button class="legg-til-linje" onclick="nyLinje()">+ Legg til linje</button>
+    <div style="margin-top:.85rem;padding:.7rem 1rem;background:var(--bg2);border-radius:6px;display:flex;justify-content:space-between;">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text2);">Total</span>
+      <span style="font-size:15px;font-weight:800;color:var(--green);" id="salgTotal">kr 0</span>
+    </div>
+    <div style="margin-top:.75rem;"><label class="lbl">Notat</label><textarea class="inp" id="salgNotat" style="height:56px;resize:none;" placeholder="Valgfritt…"></textarea></div>
+    <button class="btn" style="width:100%;margin-top:1rem;padding:.65rem;" id="lagreSalgBtn" onclick="lagreSalg()">Registrer salg</button>
+    <div id="salgMsg" style="font-family:var(--mono);font-size:11px;text-align:center;margin-top:.5rem;"></div>
+  </div>
+</div>
+
+<!-- OPPFØLGING -->
+<div class="modal-bg hidden" id="mOppf" onclick="if(event.target===this)lukkModal('mOppf')">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-hd"><div class="modal-title">Sett oppfølgingsdato</div><button class="modal-close" onclick="lukkModal('mOppf')">✕</button></div>
+    <input type="hidden" id="oppfId"/>
+    <div style="font-size:13px;font-weight:600;margin-bottom:1rem;" id="oppfNavn"></div>
+    <label class="lbl">Dato</label>
+    <input class="inp" type="date" id="oppfDato" style="margin-bottom:.6rem;"/>
+    <div style="display:flex;gap:.4rem;margin-bottom:1rem;">
+      <button class="btn-ghost" style="flex:1;font-size:11px;" onclick="settDato(1)">I morgen</button>
+      <button class="btn-ghost" style="flex:1;font-size:11px;" onclick="settDato(3)">3 dager</button>
+      <button class="btn-ghost" style="flex:1;font-size:11px;" onclick="settDato(7)">1 uke</button>
+      <button class="btn-ghost" style="flex:1;font-size:11px;" onclick="settDato(14)">2 uker</button>
+    </div>
+    <label class="lbl">Notat</label>
+    <textarea class="inp" id="oppfNotat" style="height:65px;resize:none;margin-bottom:1rem;" placeholder="Hva ble avtalt?"></textarea>
+    <button class="btn" style="width:100%;padding:.65rem;" onclick="lagreOppfolging()">Lagre</button>
+  </div>
+</div>
+
+<!-- SEND TIL -->
+<div class="modal-bg hidden" id="mSend" onclick="if(event.target===this)lukkModal('mSend')">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-hd"><div class="modal-title">Send til annen selger</div><button class="modal-close" onclick="lukkModal('mSend')">✕</button></div>
+    <input type="hidden" id="sendId"/>
+    <div style="font-size:13px;font-weight:600;margin-bottom:1rem;" id="sendNavn"></div>
+    <label class="lbl">Velg selger</label>
+    <select class="inp" id="sendSel" style="margin-bottom:1.25rem;"><option value="">Velg…</option></select>
+    <button class="btn" style="width:100%;padding:.65rem;" onclick="utforSend()">Send</button>
+  </div>
+</div>
+
+<!-- REFERANSEBEDRIFT -->
+<div class="modal-bg hidden" id="mRef" onclick="if(event.target===this)lukkModal('mRef')">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-hd"><div class="modal-title">Legg til referansebedrift</div><button class="modal-close" onclick="lukkModal('mRef')">✕</button></div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.5;">Kunden tipset om en annen bedrift? Skriv inn org.nr — kortet blir synlig for deg og prospektøren varsles.</p>
+    <label class="lbl">Org.nr (9 siffer)</label>
+    <input class="inp" id="refOrgnr" placeholder="912345678" maxlength="9" style="margin-bottom:.75rem;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+    <label class="lbl">Notat til prospektør</label>
+    <textarea class="inp" id="refNotat" style="height:65px;resize:none;margin-bottom:.75rem;" placeholder="Tips fra kunde…"></textarea>
+    <div id="refPreview" style="margin-bottom:.75rem;"></div>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn-ghost" style="flex:1;" onclick="slaOppRef()">Slå opp</button>
+      <button class="btn" style="flex:1;padding:.55rem;" id="refBtn" onclick="lagreRef()" disabled>Legg til</button>
+    </div>
+    <div id="refMsg" style="font-family:var(--mono);font-size:11px;text-align:center;margin-top:.5rem;"></div>
+  </div>
+</div>
+
+<!-- FORESPØRSEL -->
+<div class="modal-bg hidden" id="mForesp" onclick="if(event.target===this)lukkModal('mForesp')">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">Be om leads</div><button class="modal-close" onclick="lukkModal('mForesp')">✕</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem;">
+      <div><label class="lbl">Bransje</label><input class="inp" id="frBransje" placeholder="Bygg, anlegg…"/></div>
+      <div><label class="lbl">Kurs</label><select class="inp" id="frKurs"><option value="">Alle kurs</option><option value="Stillas bruker">Stillas bruker</option>
+<option value="Stillas 2–5m">Stillas 2–5m</option>
+<option value="Stillas 5–9m">Stillas 5–9m</option>
+<option value="Lift / Personløfter">Lift / Personløfter</option>
+<option value="Arbeid i høyden / Fallsikring">Arbeid i høyden / Fallsikring</option>
+<option value="Varme Arbeider">Varme Arbeider</option>
+<option value="Branntetting">Branntetting</option>
+<option value="Våtromskurs">Våtromskurs</option>
+<option value="ADK1">ADK1</option>
+<option value="Grøftekurs">Grøftekurs</option>
+<option value="FSE-kurs">FSE-kurs</option>
+<option value="NEK 400">NEK 400</option>
+<option value="Ex-kurs">Ex-kurs</option>
+<option value="HMS-kurs ledere">HMS-kurs ledere</option>
+<option value="HMS-kurs ansatte">HMS-kurs ansatte</option>
+<option value="HMS-kurs Bygg">HMS-kurs Bygg</option>
+<option value="Verneombudskurs">Verneombudskurs</option>
+<option value="Anhukerkurs">Anhukerkurs</option>
+<option value="Farlig småverktøy">Farlig småverktøy</option>
+<option value="Kjemikaliekurs">Kjemikaliekurs</option>
+<option value="Diisocyanater">Diisocyanater</option>
+<option value="Asbestkurs">Asbestkurs</option>
+<option value="Smittevernkurs">Smittevernkurs</option>
+<option value="Arbeidsvarsling">Arbeidsvarsling</option>
+<option value="Vinterdrift">Vinterdrift</option>
+<option value="Førstehjelpskurs">Førstehjelpskurs</option>
+<option value="Norskkurs byggebransjen">Norskkurs byggebransjen</option>
+<option value="ChatGPT i HMS">ChatGPT i HMS</option></select></div>
+    </div>
+    <label class="lbl">Melding</label>
+    <textarea class="inp" id="frMelding" style="height:75px;resize:none;margin-bottom:1rem;"></textarea>
+    <button class="btn" style="width:100%;padding:.65rem;" id="frBtn" onclick="sendForesp()">Send</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+const SB_URL='https://oijyvobmacigkbsugvvm.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9panl2b2JtYWNpZ2tic3VndnZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODcxOTEsImV4cCI6MjA4OTI2MzE5MX0.Zg17wUXRwSjqUKndxw0gNrmAJLawglz-oMNSuLflt-s';
+const SB_HDR={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+async function sb(method,table,body,params=''){
+  const r=await fetch(SB_URL+'/rest/v1/'+table+params,{method,headers:SB_HDR,body:body?JSON.stringify(body):undefined});
+  if(!r.ok)throw new Error(r.status+' '+await r.text());
+  return r.status===204?null:r.json();
+}
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function fmtKr(n){return new Intl.NumberFormat('no-NO',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(n||0);}
+function fmtD(d){if(!d)return'–';return new Date(d).toLocaleDateString('no-NO',{day:'2-digit',month:'short',year:'numeric'});}
+function toast(msg,err=false){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg; t.className='show'+(err?' err':'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',3000);
+}
+
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let meg = null, leads = [], salg = [], selgere = [];
+let ko = [], koIdx = 0, sokQuery = '';
+let salgLeadData = {}, refData = null;
+
+// ── SPLASH + APP VIS ───────────────────────────────────────────────────────────
+function visApp() {
+  document.getElementById('splash').classList.add('vis');
+}
+function startApp() {
+  const s = document.getElementById('splash');
+  s.classList.add('hide');
+  setTimeout(() => {
+    s.classList.remove('vis');
+    s.classList.remove('hide');
+  }, 420);
+  document.getElementById('app').classList.add('vis');
+}
+function loggUt() {
+  sessionStorage.removeItem('sf_selger');
+  window.location.href = 'index.html';
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────────────────
+(function init() {
+  const raw = sessionStorage.getItem('sf_selger');
+  if (!raw) { window.location.href = 'index.html'; return; }
+  try {
+    meg = JSON.parse(raw);
+    document.getElementById('userBadge').textContent = meg.navn;
+    visApp();
+    lastData();
+  } catch(e) {
+    window.location.href = 'index.html';
+  }
+})();
+
+// ── DATA ───────────────────────────────────────────────────────────────────────
+async function lastData() {
+  try {
+    const [l, s, sel] = await Promise.all([
+      sb('GET','leads',null,'?tildelt_til=eq.'+encodeURIComponent(meg.brukernavn)+'&order=score.desc'),
+      sb('GET','salg',null,'?selger_brukernavn=eq.'+encodeURIComponent(meg.brukernavn)+'&order=registrert.desc'),
+      sb('GET','selgere',null,'?select=brukernavn,navn&order=navn'),
+    ]);
+    leads   = l   || [];
+    salg    = s   || [];
+    selgere = sel || [];
+    byggKo();
+    oppdaterStats();
+    populerSelgere();
+  } catch(e) {
+    document.getElementById('kortEl').innerHTML =
+      '<div style="text-align:center;padding:3rem;color:var(--text2);">Feil: ' + e.message + '</div>';
+  }
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────────
+function byttFane(id, btn) {
+  ['leads','oppfolging','statistikk'].forEach(f => {
+    const el = document.getElementById('fane-'+f);
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('act'));
+  const el = document.getElementById('fane-'+id);
+  el.style.display = id === 'leads' ? 'flex' : 'block';
+  el.style.flexDirection = 'column';
+  btn.classList.add('act');
+  if (id === 'oppfolging') visOppfListe();
+  if (id === 'statistikk') visStatistikk();
+}
+
+// ── KØ ─────────────────────────────────────────────────────────────────────────
+function byggKo() {
+  const aktive  = leads.filter(l => ['ny','ringt','tilbud','ingen_svar'].includes(l.status||'ny'));
+  aktive.sort((a,b) => {
+    const ord = {ny:0,ringt:1,tilbud:2,ingen_svar:3};
+    return (ord[a.status||'ny']||0) - (ord[b.status||'ny']||0) || (b.score||0) - (a.score||0);
+  });
+  if (sokQuery) {
+    const q = sokQuery.toLowerCase();
+    const treff = leads.filter(l => (l.navn||'').toLowerCase().includes(q));
+    const resten = aktive.filter(l => !treff.find(t => t.id === l.id));
+    ko = [...treff, ...resten];
+  } else {
+    ko = aktive;
+  }
+  koIdx = 0;
+  visKort();
+}
+
+function oppdaterStats() {
+  const iko   = ko.length;
+  const oppf  = leads.filter(l => l.status === 'oppfolging').length;
+  const solgt = leads.filter(l => l.status === 'ferdig').length;
+  document.getElementById('stTot').textContent   = leads.length;
+  document.getElementById('stIKo').textContent   = iko;
+  document.getElementById('stOppf').textContent  = oppf;
+  document.getElementById('stSolgt').textContent = solgt;
+  const badge = document.getElementById('oppfBadge');
+  badge.style.display = oppf > 0 ? 'inline' : 'none';
+  badge.textContent = oppf;
+}
+
+function sok(v) {
+  sokQuery = v.trim();
+  document.getElementById('kortSearch').value = v;
+  byggKo();
+}
+
+// ── RENDER KORT ────────────────────────────────────────────────────────────────
+function visKort() {
+  const el  = document.getElementById('kortEl');
+  const pf  = document.getElementById('progFill');
+  const tl  = document.getElementById('kortTeller');
+  const bp  = document.getElementById('btnForrige');
+  const bn  = document.getElementById('btnNeste');
+
+  bp.disabled = koIdx <= 0;
+  bn.disabled = koIdx >= ko.length - 1;
+
+  if (!ko.length) {
+    el.innerHTML = '<div style="text-align:center;padding:3.5rem;color:var(--text2);"><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;">Ingen leads i køen</div>Alle leads er behandlet.</div>';
+    pf.style.width = '100%';
+    tl.textContent = 'Ferdig';
+    return;
+  }
+
+  const l  = ko[koIdx];
+  const sc = l.score || 0;
+  const bc = sc >= 80 ? 'var(--accent)' : sc >= 50 ? 'var(--warn)' : 'var(--text3)';
+  const kurs = (l.kurs_treff||[]).map(k => {
+    const cls = k.prioritet==='high' ? 'green' : k.prioritet==='med' ? 'warn' : 'muted';
+    return `<span class="tag tag-${cls}">${k.kurs}</span>`;
+  }).join('');
+
+  const statusTag = () => {
+    const map = {ringt:'Ringt',tilbud:'Tilbud sendt',oppfolging:'Oppfølging',ingen_svar:'Ingen svar',ferdig:'Solgt'};
+    const col = {ringt:'warn',tilbud:'blue',oppfolging:'blue',ingen_svar:'muted',ferdig:'green'};
+    const s = l.status||'ny';
+    return map[s] ? `<span class="tag tag-${col[s]||'muted'}" style="margin-left:.4rem;">${map[s]}</span>` : '';
+  };
+
+  pf.style.width = ko.length > 0 ? Math.round((koIdx/ko.length)*100)+'%' : '0%';
+  tl.textContent = `${koIdx+1} / ${ko.length}`;
+
+  const n = l.navn.replace(/'/g,"\'");
+  const o = l.orgnr;
+  const sted = (l.sted||'').replace(/'/g,"\'");
+
+  el.innerHTML = `<div class="lead-kort">
+    <div class="lk-header">
+      <div class="lk-score" style="color:${bc}">${sc}</div>
+      <div style="flex:1;">
+        <div class="lk-name">${l.navn}${statusTag()}</div>
+        <div class="lk-meta">
+          <span>${o}</span>
+          ${l.sted?`<span>${l.sted}</span>`:''}
+          ${l.nace_kode?`<span>NACE ${l.nace_kode}</span>`:''}
+          ${l.ansatte?`<span>${l.ansatte} ans.</span>`:''}
+        </div>
+        ${l.oppfolging_dato?`<div style="font-family:var(--mono);font-size:10px;color:var(--blue);margin-top:3px;">Oppfølging: ${fmtD(l.oppfolging_dato)}</div>`:''}
+      </div>
+      <div class="lk-links">
+        <a class="lk-link" href="https://www.proff.no/selskap/-/-/${o}/" target="_blank">Proff ↗</a>
+        <a class="lk-link" href="https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(l.navn)}" target="_blank">LinkedIn ↗</a>
+      </div>
+    </div>
+
+    ${l.aktivitet ? `<div class="lk-body"><div class="lk-akt">«${l.aktivitet.slice(0,220)}${l.aktivitet.length>220?'…':''}»</div><div style="display:flex;gap:.3rem;flex-wrap:wrap;">${kurs}</div></div>` : (kurs ? `<div class="lk-body"><div style="display:flex;gap:.3rem;flex-wrap:wrap;">${kurs}</div></div>` : '')}
+
+    <div class="lk-kontakt">
+      <div class="lk-kontakt-info" id="ki-${l.id}">
+        ${l.telefon
+          ? `<span style="font-family:var(--mono);font-size:14px;font-weight:700;">${l.telefon}</span><span style="font-family:var(--mono);font-size:9px;color:var(--text3);">(${l.telefon_kilde||'ukjent'})</span>`
+          : '<span style="font-family:var(--mono);font-size:11px;color:var(--text3);">Ingen telefon lagret</span>'}
+      </div>
+      <button class="btn-ghost" style="font-size:11px;white-space:nowrap;" id="kb-${l.id}" onclick="hentKontakt('${l.id}','${n}','${o}','${sted}')">Hent kontaktinfo</button>
+    </div>
+
+    <div class="lk-notat">
+      <textarea class="notat-ta" id="nt-${l.id}" placeholder="Notat om kunden…" onblur="lagreNotat('${l.id}',this.value)">${l.notat||''}</textarea>
+    </div>
+
+    <div class="lk-aksjon">
+      <button class="ax oppfolging" onclick="visOppfModal('${l.id}','${n}')">📅 Oppfølging<span>Sett dato</span></button>
+      <button class="ax gi-opp"     onclick="giOpp('${l.id}')">↩ Gi opp lead<span>Tilbake til pool</span></button>
+      <button class="ax salg"       onclick="visSalg('${l.id}','${n}','${o}','${l.nace_kode||''}')">💰 Salg<span>Registrer</span></button>
+      <button class="ax nei"        onclick="merkNei('${l.id}')">✗ Ikke aktuell<span>Feil prospekt</span></button>
+      <button class="ax send-til"   onclick="visSend('${l.id}','${n}')">→ Send til<span>Annen selger</span></button>
+      <button class="ax ingen-svar" onclick="ingenSvar('${l.id}')">📵 Ingen svar<span>Frigjør til pool</span></button>
+    </div>
+  </div>`;
+}
+
+function neste()   { if(koIdx < ko.length-1){ koIdx++; visKort(); scrollTo({top:0,behavior:'smooth'}); } }
+function forrige() { if(koIdx > 0)          { koIdx--; visKort(); scrollTo({top:0,behavior:'smooth'}); } }
+
+// ── AKSJONER ───────────────────────────────────────────────────────────────────
+async function patch(id, data) {
+  const lead = leads.find(l=>l.id===id);
+  if(lead) Object.assign(lead, data);
+  await sb('PATCH','leads',data,'?id=eq.'+id).catch(e=>toast(e.message,true));
+}
+
+async function giOpp(id) {
+  const l = leads.find(x=>x.id===id);
+  if(!l||!confirm(`Gi opp "${l.navn}"?`)) return;
+  await sb('PATCH','leads',{tildelt_til:null,status:'ny'},'?id=eq.'+id).catch(e=>toast(e.message,true));
+  leads = leads.filter(x=>x.id!==id);
+  byggKo(); oppdaterStats();
+  toast('Lead frigitt');
+}
+
+async function merkNei(id) {
+  await patch(id,{status:'nei'});
+  leads = leads.filter(x=>x.id!==id);
+  byggKo(); oppdaterStats();
+  toast('Merket som ikke aktuell');
+}
+
+async function ingenSvar(id) {
+  await sb('PATCH','leads',{tildelt_til:null,status:'ny'},'?id=eq.'+id).catch(e=>toast(e.message,true));
+  leads = leads.filter(x=>x.id!==id);
+  byggKo(); oppdaterStats();
+  toast('Lead frigitt til pool');
+}
+
+async function lagreNotat(id,notat) {
+  const l=leads.find(x=>x.id===id);
+  if(l) l.notat=notat;
+  await sb('PATCH','leads',{notat},'?id=eq.'+id).catch(()=>{});
+}
+
+// ── OPPFØLGING ──────────────────────────────────────────────────────────────────
+function visOppfModal(id,navn) {
+  document.getElementById('oppfId').value=id;
+  document.getElementById('oppfNavn').textContent=navn;
+  const l=leads.find(x=>x.id===id);
+  document.getElementById('oppfDato').value=l?.oppfolging_dato||'';
+  document.getElementById('oppfNotat').value=l?.notat||'';
+  settDato(3);
+  lukkAlle(); document.getElementById('mOppf').classList.remove('hidden');
+}
+function settDato(d) {
+  const dt=new Date(); dt.setDate(dt.getDate()+d);
+  document.getElementById('oppfDato').value=dt.toISOString().split('T')[0];
+}
+async function lagreOppfolging() {
+  const id=document.getElementById('oppfId').value;
+  const dato=document.getElementById('oppfDato').value;
+  const notat=document.getElementById('oppfNotat').value;
+  if(!dato){toast('Velg dato',true);return;}
+  await patch(id,{status:'oppfolging',oppfolging_dato:dato,notat});
+  lukkModal('mOppf'); byggKo(); oppdaterStats();
+  toast('Oppfølging satt til '+fmtD(dato));
+}
+
+function visOppfListe() {
+  const el=document.getElementById('oppfListe');
+  const liste=leads.filter(l=>l.status==='oppfolging').sort((a,b)=>(a.oppfolging_dato||'9999')<(b.oppfolging_dato||'9999')?-1:1);
+  if(!liste.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text2);">Ingen oppfølginger.</div>';return;}
+  const idag=new Date().toISOString().split('T')[0];
+  el.innerHTML=liste.map(l=>{
+    const forfalt=l.oppfolging_dato&&l.oppfolging_dato<=idag;
+    const sc=l.score||0, bc=sc>=80?'var(--accent)':sc>=50?'var(--warn)':'var(--text3)';
+    return `<div class="oppf-item${forfalt?' forfalt':''}" onclick="aapneOppf('${l.id}')">
+      <div style="font-size:18px;font-weight:800;color:${bc};min-width:30px;">${sc}</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${l.navn}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);">${l.orgnr}${l.sted?' · '+l.sted:''}</div></div>
+      <div style="text-align:right;"><div style="font-family:var(--mono);font-size:11px;font-weight:600;color:${forfalt?'var(--accent)':'var(--blue)'};">${fmtD(l.oppfolging_dato)}</div>${forfalt?'<div style="font-family:var(--mono);font-size:9px;color:var(--accent);">Klar!</div>':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function aapneOppf(id) {
+  // Bytt til leads-fane og vis kortet
+  const btn=document.querySelectorAll('.nav-btn')[0];
+  byttFane('leads',btn);
+  // Finn i ko
+  const idx=ko.findIndex(l=>l.id===id);
+  if(idx!==-1){ koIdx=idx; visKort(); }
+}
+
+// ── SEND TIL ───────────────────────────────────────────────────────────────────
+function populerSelgere() {
+  const sel=document.getElementById('sendSel');
+  sel.innerHTML='<option value="">Velg selger…</option>'+
+    selgere.filter(s=>s.brukernavn!==meg.brukernavn)
+      .map(s=>`<option value="${s.brukernavn}">${s.navn}</option>`).join('');
+}
+function visSend(id,navn) {
+  document.getElementById('sendId').value=id;
+  document.getElementById('sendNavn').textContent=navn;
+  lukkAlle(); document.getElementById('mSend').classList.remove('hidden');
+}
+async function utforSend() {
+  const id=document.getElementById('sendId').value;
+  const sel=document.getElementById('sendSel').value;
+  if(!sel){toast('Velg en selger',true);return;}
+  await sb('PATCH','leads',{tildelt_til:sel,status:'ny'},'?id=eq.'+id).catch(e=>toast(e.message,true));
+  leads=leads.filter(l=>l.id!==id);
+  lukkModal('mSend'); byggKo(); oppdaterStats();
+  toast('Lead sendt til '+selgere.find(s=>s.brukernavn===sel)?.navn);
+}
+
+// ── SALG ───────────────────────────────────────────────────────────────────────
+function visSalg(id,navn,orgnr,nace) {
+  salgLeadData={id,navn,orgnr,nace};
+  document.getElementById('salgId').value=id;
+  document.getElementById('salgNavn').textContent=navn;
+  document.getElementById('salgOrg').textContent=orgnr;
+  document.getElementById('salgNotat').value='';
+  document.getElementById('salgMsg').textContent='';
+  document.getElementById('salgLinjer').innerHTML='';
+  nyLinje();
+  lukkAlle(); document.getElementById('mSalg').classList.remove('hidden');
+}
+function nyLinje() {
+  const wrap=document.getElementById('salgLinjer');
+  const div=document.createElement('div');
+  div.className='salg-linje';
+  div.innerHTML=`<select class="inp" style="font-size:12px;padding:.38rem .6rem;" onchange="oppdaterTotal()"><option value="">Velg kurs…</option><option value="Stillas bruker">Stillas bruker</option>
+<option value="Stillas 2–5m">Stillas 2–5m</option>
+<option value="Stillas 5–9m">Stillas 5–9m</option>
+<option value="Lift / Personløfter">Lift / Personløfter</option>
+<option value="Arbeid i høyden / Fallsikring">Arbeid i høyden / Fallsikring</option>
+<option value="Varme Arbeider">Varme Arbeider</option>
+<option value="Branntetting">Branntetting</option>
+<option value="Våtromskurs">Våtromskurs</option>
+<option value="ADK1">ADK1</option>
+<option value="Grøftekurs">Grøftekurs</option>
+<option value="FSE-kurs">FSE-kurs</option>
+<option value="NEK 400">NEK 400</option>
+<option value="Ex-kurs">Ex-kurs</option>
+<option value="HMS-kurs ledere">HMS-kurs ledere</option>
+<option value="HMS-kurs ansatte">HMS-kurs ansatte</option>
+<option value="HMS-kurs Bygg">HMS-kurs Bygg</option>
+<option value="Verneombudskurs">Verneombudskurs</option>
+<option value="Anhukerkurs">Anhukerkurs</option>
+<option value="Farlig småverktøy">Farlig småverktøy</option>
+<option value="Kjemikaliekurs">Kjemikaliekurs</option>
+<option value="Diisocyanater">Diisocyanater</option>
+<option value="Asbestkurs">Asbestkurs</option>
+<option value="Smittevernkurs">Smittevernkurs</option>
+<option value="Arbeidsvarsling">Arbeidsvarsling</option>
+<option value="Vinterdrift">Vinterdrift</option>
+<option value="Førstehjelpskurs">Førstehjelpskurs</option>
+<option value="Norskkurs byggebransjen">Norskkurs byggebransjen</option>
+<option value="ChatGPT i HMS">ChatGPT i HMS</option></select><input class="inp" type="number" placeholder="Kr" min="0" style="font-size:12px;padding:.38rem .6rem;" oninput="oppdaterTotal()"/><button class="fjern-linje" onclick="this.closest('.salg-linje').remove();oppdaterTotal()">✕</button>`;
+  wrap.appendChild(div);
+  div.querySelector('select').focus();
+}
+function oppdaterTotal() {
+  let tot=0;
+  document.querySelectorAll('#salgLinjer input[type=number]').forEach(i=>tot+=parseInt(i.value)||0);
+  document.getElementById('salgTotal').textContent=fmtKr(tot);
+}
+async function lagreSalg() {
+  const linjer=[...document.querySelectorAll('#salgLinjer .salg-linje')].map(d=>({
+    produkt:d.querySelector('select').value,
+    belop:parseInt(d.querySelector('input').value)||0
+  })).filter(l=>l.produkt&&l.belop>0);
+  const msg=document.getElementById('salgMsg'), btn=document.getElementById('lagreSalgBtn');
+  if(!linjer.length){msg.style.color='var(--red)';msg.textContent='Legg til minst én linje.';return;}
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Registrerer…';
+  try {
+    for(const linje of linjer) {
+      await sb('POST','salg',{selger_brukernavn:meg.brukernavn,selger_navn:meg.navn,lead_id:salgLeadData.id,bedrift_navn:salgLeadData.navn,produkt:linje.produkt,belop:linje.belop,nace_kode:salgLeadData.nace,notat:document.getElementById('salgNotat').value});
+    }
+    await sb('PATCH','leads',{status:'ferdig'},'?id=eq.'+salgLeadData.id).catch(()=>{});
+    const l=leads.find(x=>x.id===salgLeadData.id); if(l)l.status='ferdig';
+    const tot=linjer.reduce((s,l)=>s+l.belop,0);
+    toast('Salg på '+fmtKr(tot)+' registrert!');
+    lukkModal('mSalg');
+    setTimeout(()=>{ if(confirm('Vil du legge til en referansebedrift fra kunden?')) visRef(); },600);
+    await lastData();
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent=e.message; }
+  finally { btn.disabled=false; btn.textContent='Registrer salg'; }
+}
+
+// ── KONTAKTINFO ────────────────────────────────────────────────────────────────
+async function hentKontakt(leadId,navn,orgnr,sted) {
+  const btn=document.getElementById('kb-'+leadId), felt=document.getElementById('ki-'+leadId);
+  if(!btn||!felt) return;
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Søker…';
+  try {
+    const [enhetResp,rollerResp]=await Promise.all([
+      fetch('https://data.brreg.no/enhetsregisteret/api/enheter/'+orgnr),
+      fetch('https://data.brreg.no/enhetsregisteret/api/enheter/'+orgnr+'/roller').catch(()=>null)
+    ]);
+    if(!enhetResp.ok) throw new Error('Ikke funnet i Brønnøysund');
+    const d=await enhetResp.json();
+    const resultater=[];
+    if(d.telefon) resultater.push({nr:d.telefon,type:/^[49]/.test(d.telefon.replace(/[ ]/g,''))?'mobil':'telefon'});
+    if(d.mobil&&d.mobil!==d.telefon) resultater.push({nr:d.mobil,type:'mobil'});
+    const personer=[];
+    if(rollerResp?.ok){
+      const r=await rollerResp.json();
+      for(const g of r.rollegrupper||[])
+        for(const rolle of g.roller||[]) {
+          const p=rolle.person?.navn;
+          if(p){const n=[p.fornavn,p.mellomnavn,p.etternavn].filter(Boolean).join(' ');if(n&&!personer.includes(n))personer.push(n);}
+        }
+    }
+    const np=navn.split(' ').slice(0,3).join('+');
+    let html='';
+    if(resultater.length) {
+      html=resultater.map((r,i)=>`<div style="display:flex;align-items:center;gap:.4rem;">
+        <span style="font-family:var(--mono);font-size:${i===0?'14px':'12px'};font-weight:${i===0?'800':'600'};color:var(--text);">${r.nr}</span>
+        ${r.type==='mobil'?'<span class="tag tag-green" style="font-size:9px;">Mobil</span>':''}
+        <button onclick="navigator.clipboard.writeText('${r.nr}').then(()=>toast('Kopiert!'))" style="background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;color:var(--text3);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">kopier</button>
+      </div>`).join('');
+      await sb('PATCH','leads',{telefon:resultater[0].nr,telefon_kilde:'Brønnøysund'},'?id=eq.'+leadId).catch(()=>{});
+    } else {
+      html='<span style="font-family:var(--mono);font-size:10px;color:var(--warn);">Ikke i Brønnøysund — søk manuelt:</span>';
+    }
+    if(personer.length) html+=`<div style="margin-top:.35rem;font-family:var(--mono);font-size:9.5px;color:var(--text2);">${personer.slice(0,3).join(' · ')}</div>`;
+    html+=`<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.4rem;">
+      <a class="lk-link" href="https://www.proff.no/selskap/-/-/${orgnr}/" target="_blank">Proff ↗</a>
+      <a class="lk-link" href="https://www.1881.no/?query=${np}" target="_blank">1881 ↗</a>
+    </div>`;
+    felt.innerHTML=html;
+    btn.textContent=resultater.length?'✓ Funnet':'✓ Sjekket';
+    btn.style.color='var(--green)';
+  } catch(e) {
+    felt.innerHTML=`<span style="font-family:var(--mono);font-size:11px;color:var(--red);">${e.message}</span>`;
+    btn.disabled=false; btn.textContent='Prøv igjen';
+  }
+}
+
+// ── REFERANSEBEDRIFT ────────────────────────────────────────────────────────────
+function visRef() { lukkAlle(); document.getElementById('refOrgnr').value=''; document.getElementById('refNotat').value=''; document.getElementById('refPreview').innerHTML=''; document.getElementById('refMsg').textContent=''; document.getElementById('refBtn').disabled=true; refData=null; document.getElementById('mRef').classList.remove('hidden'); setTimeout(()=>document.getElementById('refOrgnr').focus(),80); }
+async function slaOppRef() {
+  const orgnr=document.getElementById('refOrgnr').value.trim();
+  if(orgnr.length!==9){toast('Org.nr må være 9 siffer',true);return;}
+  const prev=document.getElementById('refPreview');
+  prev.innerHTML='<span class="spin"></span>';
+  try {
+    const r=await fetch('https://data.brreg.no/enhetsregisteret/api/enheter/'+orgnr);
+    if(!r.ok) throw new Error('Ikke funnet ('+orgnr+')');
+    const d=await r.json();
+    const sted=(d.forretningsadresse||d.postadresse||{}).poststed||'';
+    refData={orgnr,navn:d.navn,nace_kode:d.naeringskode1?.kode||'',nace_label:d.naeringskode1?.beskrivelse||'',sted};
+    prev.innerHTML=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:2px;">${d.navn}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);">${orgnr}${sted?' · '+sted:''}</div></div>`;
+    document.getElementById('refBtn').disabled=false;
+  } catch(e) { prev.innerHTML=`<span style="font-family:var(--mono);font-size:11px;color:var(--red);">${e.message}</span>`; refData=null; document.getElementById('refBtn').disabled=true; }
+}
+async function lagreRef() {
+  if(!refData) return;
+  const notat=document.getElementById('refNotat').value;
+  const btn=document.getElementById('refBtn'), msg=document.getElementById('refMsg');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  try {
+    await fetch(SB_URL+'/rest/v1/leads',{method:'POST',headers:{...SB_HDR,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({...refData,tildelt_til:meg.brukernavn,tildelt_av:'referanse-'+meg.navn,status:'ny',notat:notat||'Referansebedrift',score:0,kurs_treff:[]})});
+    await sb('POST','lead_foresporsler',{selger_brukernavn:meg.brukernavn,selger_navn:meg.navn,bransje:refData.nace_label,kurs:'',melding:`Referansebedrift: ${refData.navn} (${refData.orgnr})${notat?' — '+notat:''}`});
+    msg.style.color='var(--green)'; msg.textContent='✓ '+refData.navn+' lagt til!';
+    toast('Referansebedrift lagt til'); setTimeout(()=>lukkModal('mRef'),1600);
+    await lastData();
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent=e.message; btn.disabled=false; btn.textContent='Legg til'; }
+}
+
+// ── FORESPØRSEL ────────────────────────────────────────────────────────────────
+function visForesp() { lukkAlle(); document.getElementById('mForesp').classList.remove('hidden'); }
+async function sendForesp() {
+  const btn=document.getElementById('frBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  try {
+    await sb('POST','lead_foresporsler',{selger_brukernavn:meg.brukernavn,selger_navn:meg.navn,bransje:document.getElementById('frBransje').value,kurs:document.getElementById('frKurs').value,melding:document.getElementById('frMelding').value});
+    lukkModal('mForesp'); toast('Forespørsel sendt');
+  } catch(e) { toast(e.message,true); }
+  finally { btn.disabled=false; btn.textContent='Send'; }
+}
+
+// ── STATISTIKK ──────────────────────────────────────────────────────────────────
+function visStatistikk() {
+  const naa=new Date(), ms=new Date(naa.getFullYear(),naa.getMonth(),1);
+  const dm=salg.filter(s=>new Date(s.registrert)>=ms);
+  document.getElementById('stSalgMnd').textContent=dm.length;
+  document.getElementById('stKrMnd').textContent=fmtKr(dm.reduce((t,s)=>t+(s.belop||0),0));
+  document.getElementById('stSalgTot').textContent=fmtKr(salg.reduce((t,s)=>t+(s.belop||0),0));
+  document.getElementById('stKonv').textContent=(leads.length?Math.round((salg.length/leads.length)*100):0)+'%';
+  const el=document.getElementById('salgListe');
+  if(!salg.length){el.innerHTML='<div style="text-align:center;padding:2.5rem;color:var(--text2);">Ingen salg ennå.</div>';return;}
+  el.innerHTML=salg.slice(0,12).map(s=>`<div class="card" style="display:flex;align-items:center;gap:1rem;margin-bottom:.5rem;"><div style="flex:1;"><div style="font-size:13px;font-weight:600;">${s.bedrift_navn}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:2px;">${s.produkt}</div></div><div style="text-align:right;"><div style="font-size:14px;font-weight:800;color:var(--green);">${fmtKr(s.belop)}</div><div style="font-family:var(--mono);font-size:9.5px;color:var(--text2);">${fmtD(s.registrert)}</div></div></div>`).join('');
+}
+
+// ── MODAL HELPERS ───────────────────────────────────────────────────────────────
+function lukkModal(id) { document.getElementById(id).classList.add('hidden'); }
+function lukkAlle() { document.querySelectorAll('.modal-bg').forEach(m=>m.classList.add('hidden')); }
+</script>
+</body>
+</html>
